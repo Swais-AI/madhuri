@@ -1,20 +1,49 @@
-import { Search, ShieldCheck } from "lucide-react";
+"use client";
 
-export default function Topbar() {
+import { Shield, Search } from "lucide-react";
+
+export default function Topbar({
+  headmaster,
+  searchText,
+  setSearchText
+}) {
   return (
     <div className="topbar">
+
+      {/* Left side search */}
+
       <div className="search-box">
         <Search size={18} />
-        <input placeholder="Search..." />
+
+        <input
+          type="text"
+          value={searchText}
+          onChange={(e)=>setSearchText(e.target.value)}
+          placeholder="Search students..."
+        />
       </div>
 
-      <div className="profile-box">
-        <ShieldCheck size={20} />
-        <div>
-          <h4>Headmaster</h4>
-          <p>Admin Access</p>
+
+      {/* Right side profile */}
+
+      <div className="topbar-right">
+        <div className="profile-card">
+
+          <Shield size={22} />
+
+          <div>
+            <h3>
+              Welcome {headmaster?.name || "Headmaster"}
+            </h3>
+
+            <p>
+              {headmaster?.role || "Admin Access"}
+            </p>
+          </div>
+
         </div>
       </div>
+
     </div>
   );
 }

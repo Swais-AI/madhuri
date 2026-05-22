@@ -12,22 +12,24 @@ export default function ProgressSection({ progressData }) {
             <th>Exam</th>
             <th>Subject</th>
             <th>Marks</th>
+            <th>Percentage</th>
             <th>Grade</th>
             <th>Remarks</th>
           </tr>
         </thead>
 
         <tbody>
-          {progressData.map((item) => (
+          {progressData?.map((item) => (
             <tr key={item.marks_id}>
-              <td>{item.student_name}</td>
+              <td>{item.full_name}</td>
               <td>{item.exam_name}</td>
               <td>{item.subject_name}</td>
               <td>
                 {item.marks_obtained} / {item.max_marks}
               </td>
+              <td>{item.percentage}%</td>
               <td>{item.grade}</td>
-              <td>{item.remarks}</td>
+              <td>{item.remarks || "-"}</td>
             </tr>
           ))}
         </tbody>

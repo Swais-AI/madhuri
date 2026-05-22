@@ -15,9 +15,9 @@ import {
 const COLORS = ["#2563EB", "#22C55E", "#F59E0B", "#EF4444"];
 
 export default function DashboardSection({
-  dashboardSummary,
-  performanceData,
-  pieData,
+  dashboardSummary = {},
+  performanceData = [],
+  pieData = [],
 }) {
   return (
     <>
@@ -49,8 +49,8 @@ export default function DashboardSection({
         <div className="analytics-card orange">
           <BookOpen size={32} />
           <div>
-            <h2>{dashboardSummary.attendance_percentage || 0}%</h2>
-            <p>Attendance</p>
+            <h2>{dashboardSummary.total_classes || 0}</h2>
+            <p>Total Classes</p>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function DashboardSection({
             <PieChart>
               <Pie data={pieData} dataKey="value" outerRadius={90} label>
                 {pieData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`pie-${entry.name || index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
             </PieChart>

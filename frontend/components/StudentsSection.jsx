@@ -19,12 +19,12 @@ export default function StudentsSection({ students }) {
         </thead>
 
         <tbody>
-          {students.map((student) => (
+          {students?.map((student) => (
             <tr key={student.student_id}>
               <td>{student.admission_no}</td>
               <td>{student.full_name}</td>
               <td>{student.class_name}</td>
-              <td>{student.section}</td>
+              <td>{student.section_name}</td>
               <td>{student.parent_name}</td>
               <td>{student.mobile_no}</td>
               <td>{student.email_id}</td>

@@ -10,8 +10,8 @@ export default function ClassTeachersSection({ classTeachers }) {
           <tr>
             <th>Class</th>
             <th>Teacher</th>
-            <th>Students</th>
-            <th>Responsibilities</th>
+            <th>Section</th>
+            <th>Academic Year</th>
           </tr>
         </thead>
 
@@ -19,9 +19,9 @@ export default function ClassTeachersSection({ classTeachers }) {
           {classTeachers.map((item, index) => (
             <tr key={index}>
               <td>{item.class_name}</td>
-              <td>{item.teacher_name}</td>
-              <td>{item.total_students}</td>
-              <td>{item.responsibilities}</td>
+              <td>{item.class_teacher_name}</td>
+              <td>{item.section_name}</td>
+              <td>{item.academic_year}</td>
             </tr>
           ))}
         </tbody>

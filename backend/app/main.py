@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes.student_routes import router as student_router
-from app.routes.teacher_routes import router as teacher_router
-from app.routes.dashboard_routes import router as dashboard_router
-from app.llm_analysis import router as llm_router
+from .routes import student_routes
+from .routes import teacher_routes
+from .routes import dashboard_routes
+from .routes import class_teachers
+from .routes import headmaster_routes
+
 app = FastAPI()
 
 app.add_middleware(
@@ -15,11 +17,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(student_routes.router)
+app.include_router(teacher_routes.router)
+app.include_router(dashboard_routes.router)
+app.include_router(class_teachers.router)
+app.include_router(headmaster_routes.router)
+
+
 @app.get("/")
 def home():
-    return {"message": "SGS School ERP Backend Running"}
-
-app.include_router(student_router)
-app.include_router(teacher_router)
-app.include_router(dashboard_router)
-app.include_router(llm_router)
+    return {"message": "Backend running successfully"}

@@ -8,7 +8,7 @@ import {
   UserCheck,
   LogOut,
 } from "lucide-react";
-
+import Image from "next/image";
 export default function Sidebar({
   activeTab,
   setActiveTab,
@@ -40,10 +40,15 @@ return(
 
 <div className="brand-box">
 
-<div className="brand-circle">
-SGS
-</div>
-
+<div className="logo-circle">
+        <Image
+          src="/school-logo.jpeg"
+          alt="SGS Logo"
+          width={80}
+          height={80}
+          className="school-logo"
+        />
+      </div>
 <h2>SGS SCHOOL</h2>
 
 <p>Headmaster Dashboard</p>
