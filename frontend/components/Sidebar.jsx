@@ -62,13 +62,14 @@ return(
 const Icon=item.icon;
 
 return(
-
 <button
-key={item.id}
-className={`menu-btn ${
-activeTab===item.id ? "active":""
-}`}
-onClick={()=>setActiveTab(item.id)}
+  type="button"
+  key={item.id}
+  className={`menu-btn ${activeTab === item.id ? "active" : ""}`}
+  onClick={() => {
+    console.log("Clicked tab:", item.id);
+    setActiveTab(item.id);
+  }}
 >
 
 <Icon size={18}/>
@@ -76,7 +77,6 @@ onClick={()=>setActiveTab(item.id)}
 {item.label}
 
 </button>
-
 )
 
 })}
