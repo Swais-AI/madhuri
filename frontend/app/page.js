@@ -13,12 +13,13 @@ import FunctionsSection from "../components/FunctionsSection";
 import ToursSection from "../components/ToursSection";
 import ClassTeachersSection from "../components/ClassTeachersSection";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function HomePage() {
   const fetched = useRef(false);
 
   const [activeTab, setActiveTab] = useState("dashboard");
+
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
@@ -29,8 +30,9 @@ export default function HomePage() {
   const [toursData, setToursData] = useState([]);
   const [dashboardSummary, setDashboardSummary] = useState({});
   const [headmaster, setHeadmaster] = useState(null);
+
   const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -38,62 +40,64 @@ export default function HomePage() {
     fetched.current = true;
 
     async function loadDashboardData() {
-      try {
-        setLoading(true);
-        setError("");
+      setLoading(true);
+      setError("");
 
-        const [
-          studentsRes,
-          teachersRes,
-          progressRes,
-          classTeachersRes,
-          performanceRes,
-          passFailRes,
-          functionsRes,
-          toursRes,
-          summaryRes,
-          headmasterRes,
-        ] = await Promise.all([
-          axios.get(`${BASE_URL}/students`),
-          axios.get(`${BASE_URL}/teachers`),
-          axios.get(`${BASE_URL}/progress`),
-          axios.get(`${BASE_URL}/class-teachers`),
-          axios.get(`${BASE_URL}/performance-chart`),
-          axios.get(`${BASE_URL}/pass-fail-chart`),
-          axios.get(`${BASE_URL}/functions`),
-          axios.get(`${BASE_URL}/tours`),
-          axios.get(`${BASE_URL}/dashboard-summary`),
-          axios.get(`${BASE_URL}/headmaster`),
-        ]);
+      const results = await Promise.allSettled([
+        axios.get(`${BASE_URL}/students`),
+        axios.get(`${BASE_URL}/teachers`),
+        axios.get(`${BASE_URL}/progress`),
+        axios.get(`${BASE_URL}/class-teachers`),
+        axios.get(`${BASE_URL}/performance-chart`),
+        axios.get(`${BASE_URL}/pass-fail-chart`),
+        axios.get(`${BASE_URL}/functions`),
+        axios.get(`${BASE_URL}/tours`),
+        axios.get(`${BASE_URL}/dashboard-summary`),
+        axios.get(`${BASE_URL}/headmaster`),
+      ]);
 
-        setStudents(studentsRes.data || []);
-        setTeachers(teachersRes.data || []);
-        setProgressData(progressRes.data || []);
-        setClassTeachers(classTeachersRes.data || []);
-        setPerformanceData(performanceRes.data || []);
-        setPieData(passFailRes.data || []);
-        setFunctionsData(functionsRes.data || []);
-        setToursData(toursRes.data || []);
-        setDashboardSummary(summaryRes.data || {});
-        setHeadmaster(headmasterRes.data || null);
-      } catch (err) {
-        console.error("Dashboard API loading failed:", err);
-        setError("Unable to load dashboard data. Please check backend API and routes.");
-      } finally {
-        setLoading(false);
+      const getData = (index, fallback) =>
+        results[index]?.status === "fulfilled"
+          ? results[index].value.data
+          : fallback;
+
+      setStudents(getData(0, []));
+      setTeachers(getData(1, []));
+      setProgressData(getData(2, []));
+      setClassTeachers(getData(3, []));
+      setPerformanceData(getData(4, []));
+      setPieData(getData(5, []));
+      setFunctionsData(getData(6, []));
+      setToursData(getData(7, []));
+      setDashboardSummary(getData(8, {}));
+      setHeadmaster(getData(9, null));
+
+      if (
+        results.some((result) => result.status === "rejected")
+      ) {
+        setError(
+          "Backend unavailable. Showing available UI."
+        );
       }
+
+      setLoading(false);
     }
 
     loadDashboardData();
   }, []);
 
   const filteredStudents = students.filter((student) =>
-    student.full_name?.toLowerCase().includes(searchText.toLowerCase())
+    student.full_name
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase())
   );
 
   return (
     <div className="layout">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       <div className="main-content">
         <Topbar
@@ -102,39 +106,56 @@ export default function HomePage() {
           setSearchText={setSearchText}
         />
 
-        {error && <div className="error-banner">{error}</div>}
-        {loading && <div className="loading-text">Loading dashboard...</div>}
+        {error && (
+          <div className="error-banner">{error}</div>
+        )}
 
-        {!loading && activeTab === "dashboard" && (
+        {loading && (
+          <div className="loading-text">
+            Loading...
+          </div>
+        )}
+
+        {activeTab === "dashboard" && (
           <DashboardSection
-            dashboardSummary={dashboardSummary}
-            performanceData={performanceData}
-            pieData={pieData}
+            dashboardSummary={dashboardSummary || {}}
+            performanceData={performanceData || []}
+            pieData={pieData || []}
           />
         )}
 
-        {!loading && activeTab === "students" && (
-          <StudentsSection students={filteredStudents} />
+        {activeTab === "students" && (
+          <StudentsSection
+            students={filteredStudents || []}
+          />
         )}
 
-        {!loading && activeTab === "teachers" && (
-          <TeachersSection teachers={teachers} />
+        {activeTab === "teachers" && (
+          <TeachersSection
+            teachers={teachers || []}
+          />
         )}
 
-        {!loading && activeTab === "progress" && (
-          <ProgressSection progressData={progressData} />
+        {activeTab === "progress" && (
+          <ProgressSection
+            progressData={progressData || []}
+          />
         )}
 
-        {!loading && activeTab === "functions" && (
-          <FunctionsSection functionsData={functionsData} />
+        {activeTab === "functions" && (
+          <FunctionsSection
+            functionsData={functionsData || []}
+          />
         )}
 
-        {!loading && activeTab === "tours" && (
-          <ToursSection toursData={toursData} />
+        {activeTab === "tours" && (
+          <ToursSection toursData={toursData || []} />
         )}
 
-        {!loading && activeTab === "classTeachers" && (
-          <ClassTeachersSection classTeachers={classTeachers} />
+        {activeTab === "classTeachers" && (
+          <ClassTeachersSection
+            classTeachers={classTeachers || []}
+          />
         )}
       </div>
     </div>
