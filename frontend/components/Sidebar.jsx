@@ -3,6 +3,7 @@ import {
   Users,
   GraduationCap,
   TrendingUp,
+  Bell,
   CalendarDays,
   MapPinned,
   UserCheck,
@@ -23,6 +24,8 @@ const menuItems = [
 { id:"teachers",label:"Teachers",icon:GraduationCap },
 
 { id:"progress",label:"Progress",icon:TrendingUp },
+
+{ id: "notifications", label: "Notifications", icon: Bell },
 
 { id:"functions",label:"Functions",icon:CalendarDays },
 

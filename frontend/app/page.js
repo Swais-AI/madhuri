@@ -9,6 +9,7 @@ import DashboardSection from "../components/DashboardSection";
 import StudentsSection from "../components/StudentsSection";
 import TeachersSection from "../components/TeachersSection";
 import ProgressSection from "../components/ProgressSection";
+import NotificationsSection from "../components/NotificationsSection";
 import FunctionsSection from "../components/FunctionsSection";
 import ToursSection from "../components/ToursSection";
 import ClassTeachersSection from "../components/ClassTeachersSection";
@@ -23,6 +24,8 @@ export default function HomePage() {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [classTeachers, setClassTeachers] = useState([]);
   const [performanceData, setPerformanceData] = useState([]);
   const [pieData, setPieData] = useState([]);
@@ -33,7 +36,6 @@ export default function HomePage() {
 
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (fetched.current) return;
@@ -41,12 +43,12 @@ export default function HomePage() {
 
     async function loadDashboardData() {
       setLoading(true);
-      setError("");
 
       const results = await Promise.allSettled([
         axios.get(`${BASE_URL}/students`),
         axios.get(`${BASE_URL}/teachers`),
         axios.get(`${BASE_URL}/progress`),
+        axios.get(`${BASE_URL}/notifications`),
         axios.get(`${BASE_URL}/class-teachers`),
         axios.get(`${BASE_URL}/performance-chart`),
         axios.get(`${BASE_URL}/pass-fail-chart`),
@@ -64,57 +66,63 @@ export default function HomePage() {
       setStudents(getData(0, []));
       setTeachers(getData(1, []));
       setProgressData(getData(2, []));
-      setClassTeachers(getData(3, []));
-      setPerformanceData(getData(4, []));
-      setPieData(getData(5, []));
-      setFunctionsData(getData(6, []));
-      setToursData(getData(7, []));
-      setDashboardSummary(getData(8, {}));
-      setHeadmaster(getData(9, null));
+      const notificationData = getData(3, []);
 
-      if (
-        results.some((result) => result.status === "rejected")
-      ) {
-        setError(
-          "Backend unavailable. Showing available UI."
-        );
-      }
+setNotifications(notificationData);
+
+setUnreadCount(
+  notificationData.filter((item) => item.is_read === false).length
+);
+      setClassTeachers(getData(4, []));
+      setPerformanceData(getData(5, []));
+      setPieData(getData(6, []));
+      setFunctionsData(getData(7, []));
+      setToursData(getData(8, []));
+      setDashboardSummary(getData(9, {}));
+      setHeadmaster(getData(10, null));
 
       setLoading(false);
     }
 
     loadDashboardData();
   }, []);
+const searchItems = (items, keys) => {
+  if (!searchText.trim()) return items || [];
 
-  const filteredStudents = students.filter((student) =>
-    student.full_name
-      ?.toLowerCase()
-      .includes(searchText.toLowerCase())
+  const search = searchText.trim().toLowerCase();
+
+  return (items || []).filter((item) =>
+    keys.some((key) => {
+      const value = String(item?.[key] || "").trim().toLowerCase();
+      return value.includes(search);
+    })
   );
+};
+
+const handleTabChange = async (tab) => {
+  setActiveTab(tab);
+
+  if (tab === "notifications") {
+    await axios.put(`${BASE_URL}/notifications/mark-read`);
+
+    setUnreadCount(0);
+  }
+};
 
   return (
     <div className="layout">
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       <div className="main-content">
         <Topbar
           headmaster={headmaster}
           searchText={searchText}
           setSearchText={setSearchText}
+          notificationCount={unreadCount}
+
         />
 
-        {error && (
-          <div className="error-banner">{error}</div>
-        )}
-
-        {loading && (
-          <div className="loading-text">
-            Loading...
-          </div>
-        )}
+        {loading && <div className="loading-text">Loading...</div>}
 
         {activeTab === "dashboard" && (
           <DashboardSection
@@ -123,38 +131,78 @@ export default function HomePage() {
             pieData={pieData || []}
           />
         )}
-
         {activeTab === "students" && (
-          <StudentsSection
-            students={filteredStudents || []}
-          />
-        )}
-
+        <StudentsSection
+        students={students}
+        searchText={searchText}
+  />
+)}
         {activeTab === "teachers" && (
           <TeachersSection
-            teachers={teachers || []}
+            teachers={searchItems(teachers, [
+              "full_name",
+              "subject_name",
+              "role",
+              "email_id",
+              "phone",
+            ])}
           />
         )}
 
         {activeTab === "progress" && (
           <ProgressSection
-            progressData={progressData || []}
+            progressData={searchItems(progressData, [
+              "full_name",
+              "exam_name",
+              "subject_name",
+              "grade",
+              "remarks",
+            ])}
+          />
+        )}
+
+        {activeTab === "notifications" && (
+          <NotificationsSection
+            notifications={searchItems(notifications, [
+              "notice_title",
+              "notice_text",
+              "applicable_class",
+            ])}
           />
         )}
 
         {activeTab === "functions" && (
           <FunctionsSection
-            functionsData={functionsData || []}
+            functionsData={searchItems(functionsData, [
+              "function_name",
+              "coordinator_name",
+              "status",
+              "description",
+            ])}
           />
         )}
 
         {activeTab === "tours" && (
-          <ToursSection toursData={toursData || []} />
+          <ToursSection
+            toursData={searchItems(toursData, [
+              "tour_name",
+              "location_name",
+              "incharge_name",
+              "status",
+            ])}
+          />
         )}
 
         {activeTab === "classTeachers" && (
           <ClassTeachersSection
-            classTeachers={classTeachers || []}
+            classTeachers={searchItems(classTeachers, [
+              "class_name",
+              "section_name",
+              "academic_year",
+              "class_teacher_name",
+              "teacher_email",
+              "teacher_mobile",
+            ])}
           />
         )}
       </div>

@@ -13,8 +13,8 @@ def get_headmaster():
             SELECT 
                 u.full_name,
                 r.role_name
-            FROM sgs_users_master u
-            JOIN sgs_role_master r
+            FROM sgs_users_masters u
+            JOIN sgs_role_response r
                 ON r.role_id = u.role_id
             WHERE LOWER(r.role_name) = 'headmaster'
               AND u.is_active = TRUE

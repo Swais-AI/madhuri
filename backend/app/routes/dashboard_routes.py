@@ -72,8 +72,8 @@ def get_exams():
             return rows_to_dict(cur)
 
 
-@router.get("/notices")
-def get_notices():
+@router.get("/notifications")
+def get_notifications():
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -82,11 +82,25 @@ def get_notices():
                     notice_title,
                     notice_text,
                     notice_date,
-                    applicable_class
+                    applicable_class,
+                    is_read
                 FROM sgs_notice_board
                 ORDER BY notice_id DESC;
             """)
             return rows_to_dict(cur)
+        
+@router.put("/notifications/mark-read")
+def mark_notifications_read():
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE sgs_notice_board
+                SET is_read = TRUE
+                WHERE is_read = FALSE;
+            """)
+            conn.commit()
+
+    return {"message": "Success"}        
 
 
 @router.get("/functions")
@@ -101,8 +115,10 @@ def get_functions():
                     coordinator_name,
                     participants_count,
                     status,
-                    description
+                    description,
+                    record_status    
                 FROM sgs_school_functions
+                WHERE record_status = 'Active'
                 ORDER BY function_id DESC;
             """)
             return rows_to_dict(cur)
@@ -120,8 +136,9 @@ def get_tours():
                     tour_date,
                     incharge_name,
                     students_count,
-                    status
+                    record_status
                 FROM sgs_school_tours
+                WHERE record_status = 'Active'
                 ORDER BY tour_id DESC;
             """)
             return rows_to_dict(cur)
@@ -151,16 +168,7 @@ def dashboard_summary():
                         )
                         FROM sgs_student_marks
                         WHERE record_status = 'Active'
-                    ), 0) AS pass_percentage,
-
-                    COALESCE((
-                        SELECT ROUND(
-                            (SUM(CASE WHEN attendance_status = 'Present' THEN 1 ELSE 0 END)::numeric
-                            / NULLIF(COUNT(*), 0)) * 100,
-                            2
-                        )
-                        FROM sgs_student_attendance
-                    ), 0) AS attendance_percentage;
+                    ), 0) AS pass_percentage
             """)
             return row_to_dict(cur)
 

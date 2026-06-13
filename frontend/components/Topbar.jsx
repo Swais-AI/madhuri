@@ -1,11 +1,12 @@
 "use client";
 
-import { Shield, Search } from "lucide-react";
+import { Shield, Bell, Search } from "lucide-react";
 
 export default function Topbar({
   headmaster,
   searchText,
-  setSearchText
+  setSearchText,
+  notificationCount = 0,
 }) {
   return (
     <div className="topbar">
@@ -18,17 +19,30 @@ export default function Topbar({
         <input
           type="text"
           value={searchText}
-          onChange={(e)=>setSearchText(e.target.value)}
+          onChange={(e) => setSearchText(e.target.value)}
           placeholder="Search students..."
         />
       </div>
 
-
-      {/* Right side profile */}
+      {/* Right side */}
 
       <div className="topbar-right">
-        <div className="profile-card">
 
+        {/* Notification Bell */}
+
+        <div className="notification-bell">
+          <Bell size={22} />
+
+          {notificationCount > 0 && (
+            <span className="notification-badge">
+              {notificationCount}
+            </span>
+          )}
+        </div>
+
+        {/* Profile */}
+
+        <div className="profile-card">
           <Shield size={22} />
 
           <div>

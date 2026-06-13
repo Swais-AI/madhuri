@@ -1,8 +1,58 @@
-export default function StudentsSection({ students }) {
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function StudentsSection({ students = [], searchText = "" }) {
+  const tabs = [
+    ...new Set(
+      students
+        .filter((student) => student.class_name && student.section_name)
+        .map(
+          (student) =>
+            `${student.class_name} - Section ${student.section_name}`
+        )
+    ),
+  ];
+
+  const [activeSectionTab, setActiveSectionTab] = useState("");
+
+  useEffect(() => {
+    if (!activeSectionTab && tabs.length > 0) {
+      setActiveSectionTab(tabs[0]);
+    }
+  }, [tabs, activeSectionTab]);
+const filteredStudents = students.filter((student) => {
+  const matchesSearch =
+    !searchText ||
+    student.full_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+    student.admission_no?.toLowerCase().includes(searchText.toLowerCase()) ||
+    student.class_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+    student.section_name?.toLowerCase().includes(searchText.toLowerCase());
+
+  if (searchText) {
+    return matchesSearch; // search all students
+  }
+
+  return (
+    `${student.class_name} - Section ${student.section_name}` === activeSectionTab
+  );
+});
   return (
     <div className="page-card">
       <div className="page-header">
         <h2>Students Management</h2>
+      </div>
+
+      <div className="student-section-tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveSectionTab(tab)}
+            className={activeSectionTab === tab ? "active-student-tab" : ""}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       <table>
@@ -19,17 +69,23 @@ export default function StudentsSection({ students }) {
         </thead>
 
         <tbody>
-          {students?.map((student) => (
-            <tr key={student.student_id}>
-              <td>{student.admission_no}</td>
-              <td>{student.full_name}</td>
-              <td>{student.class_name}</td>
-              <td>{student.section_name}</td>
-              <td>{student.parent_name}</td>
-              <td>{student.mobile_no}</td>
-              <td>{student.email_id}</td>
+          {filteredStudents.length === 0 ? (
+            <tr>
+              <td colSpan="7">No students found</td>
             </tr>
-          ))}
+          ) : (
+            filteredStudents.map((student, index) => (
+              <tr key={`${student.student_id}-${index}`}>
+                <td>{student.admission_no || "-"}</td>
+                <td>{student.full_name || "-"}</td>
+                <td>{student.class_name || "-"}</td>
+                <td>{student.section_name || "-"}</td>
+                <td>{student.parent_name || "-"}</td>
+                <td>{student.mobile_no || "-"}</td>
+                <td>{student.email_id || "-"}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

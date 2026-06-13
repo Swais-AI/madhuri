@@ -1,3 +1,14 @@
+/* =========================================================
+   SGS HM DASHBOARD - GLOBAL STYLES
+   Organized version
+   Note: Existing screen style is preserved.
+   ========================================================= */
+
+
+/* =========================================================
+   1. RESET & BASE STYLES
+   ========================================================= */
+
 * {
   margin: 0;
   padding: 0;
@@ -10,10 +21,27 @@ body {
   color: #1e293b;
 }
 
+
+/* =========================================================
+   2. MAIN LAYOUT
+   ========================================================= */
+
 .layout {
   display: flex;
   min-height: 100vh;
 }
+
+.main-content {
+  flex: 1;
+  padding: 28px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+
+/* =========================================================
+   3. SIDEBAR
+   ========================================================= */
 
 .sidebar {
   width: 270px;
@@ -64,18 +92,11 @@ body {
   font-size: 15px;
 }
 
-.dual-logo {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
 
-.dual-logo .logo-circle {
-  width: 70px;
-  height: 70px;
-  margin: 0;
-}
+/* =========================================================
+   4. SIDEBAR MENU & LOGOUT
+   ========================================================= */
+
 .menu-list {
   display: flex;
   flex-direction: column;
@@ -117,12 +138,10 @@ body {
   font-size: 16px;
 }
 
-.main-content {
-  flex: 1;
-  padding: 28px;
-  overflow-y: auto;
-  min-width: 0;
-}
+
+/* =========================================================
+   5. TOPBAR, SEARCH, PROFILE & NOTIFICATION
+   ========================================================= */
 
 .topbar {
   display: flex;
@@ -152,6 +171,43 @@ body {
   font-size: 15px;
 }
 
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-bell {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
 .profile-card,
 .profile-box {
   background: white;
@@ -173,6 +229,11 @@ body {
   color: #64748b;
   font-size: 13px;
 }
+
+
+/* =========================================================
+   6. DASHBOARD KPI CARDS
+   ========================================================= */
 
 .analytics-grid {
   display: grid;
@@ -216,12 +277,22 @@ body {
   background: linear-gradient(135deg, #f59e0b, #ea580c);
 }
 
+
+/* =========================================================
+   7. DASHBOARD CHARTS
+   ========================================================= */
+
 .charts-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 22px;
   margin-bottom: 28px;
 }
+
+
+/* =========================================================
+   8. COMMON CARDS & PAGE HEADER
+   ========================================================= */
 
 .card,
 .page-card {
@@ -247,6 +318,11 @@ body {
 .page-header h2 {
   font-size: 32px;
 }
+
+
+/* =========================================================
+   9. TABLE STYLES
+   ========================================================= */
 
 table {
   width: 100%;
@@ -275,6 +351,19 @@ tbody tr:hover {
   background: #f8fafc;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #eff6ff;
+}
+
+
+/* =========================================================
+   10. STATUS BADGES
+   ========================================================= */
+
 .status {
   padding: 6px 14px;
   border-radius: 18px;
@@ -291,6 +380,11 @@ tbody tr:hover {
   background: #fee2e2;
   color: #dc2626;
 }
+
+
+/* =========================================================
+   11. STUDENT CARDS
+   ========================================================= */
 
 .student-grid {
   display: grid;
@@ -348,6 +442,233 @@ tbody tr:hover {
   font-size: 14px;
 }
 
+
+/* =========================================================
+   12. STUDENT SECTION TABS
+   ========================================================= */
+
+.student-section-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.student-section-tabs button {
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid #dbe3f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.student-section-tabs button:hover {
+  background: #f8fafc;
+  color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.active-student-tab {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+}
+
+
+/* =========================================================
+   13. PROGRESS SCREEN - COMMON
+   ========================================================= */
+
+.progress-subtitle {
+  margin: 18px 0;
+  color: #0f172a;
+}
+
+.progress-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.progress-breadcrumb button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   14. PROGRESS SCREEN - CLASS CARDS
+   ========================================================= */
+
+.progress-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.progress-class-card {
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 20px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.progress-class-card:hover {
+  color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.progress-class-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.progress-class-count {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.progress-class-card.active-progress-class-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+}
+
+.progress-class-card.active-progress-class-card:hover {
+  color: #ffffff !important;
+}
+
+.progress-class-card.active-progress-class-card .progress-class-name,
+.progress-class-card.active-progress-class-card .progress-class-count {
+  color: #ffffff !important;
+}
+
+button.progress-class-card.active-progress-class-card {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: 1px solid #2563eb !important;
+}
+
+button.progress-class-card.active-progress-class-card .progress-class-name,
+button.progress-class-card.active-progress-class-card .progress-class-count {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   15. PROGRESS SCREEN - STUDENT CARDS
+   ========================================================= */
+
+.progress-student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.progress-student-card-small {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.progress-student-card-small h3 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  color: #0f172a;
+}
+
+.progress-student-card-small p {
+  margin: 0;
+  color: #64748b;
+}
+
+.progress-student-card-small button,
+.progress-back-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.progress-back-btn {
+  margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   16. PROGRESS SCREEN - SUMMARY & TABLE
+   ========================================================= */
+
+.progress-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.progress-summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.progress-summary-card span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.progress-summary-card strong {
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.progress-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.progress-table-scroll table {
+  width: 100%;
+  min-width: 700px;
+}
+
+
+/* =========================================================
+   17. BOTTOM GRID, ERROR & LOADING STATES
+   ========================================================= */
+
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -371,6 +692,11 @@ tbody tr:hover {
   margin-bottom: 16px;
   color: #475569;
 }
+
+
+/* =========================================================
+   18. RESPONSIVE STYLES
+   ========================================================= */
 
 @media (max-width: 1400px) {
   .analytics-grid {
@@ -402,6 +728,10 @@ tbody tr:hover {
     align-items: stretch;
   }
 
+  .topbar-right {
+    justify-content: flex-end;
+  }
+
   .analytics-grid,
   .bottom-grid,
   .student-grid {
@@ -410,5 +740,20 @@ tbody tr:hover {
 
   .search-box {
     width: 100%;
+  }
+
+  .progress-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .progress-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-student-card-small {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

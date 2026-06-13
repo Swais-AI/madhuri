@@ -1,8 +1,11 @@
 from fastapi import APIRouter
-from ..database import get_connection
+from app.database import get_connection
 
 router = APIRouter()
 
+
+def rows_to_dict(cursor):
+    return [dict(row) for row in cursor.fetchall()]
 
 @router.get("/students")
 def get_students():
@@ -14,41 +17,21 @@ def get_students():
                     s.admission_no,
                     s.full_name,
                     c.class_name,
-                    c.section_name,
+                    s.section AS section_name,
                     s.roll_no,
-                    s.parent_name,
-                    s.mobile_no,
-                    s.email_id,
+                    COALESCE(p.full_name, '-') AS parent_name,
+                    COALESCE(p.phone, s.student_phone, '-') AS mobile_no,
+                    s.student_email AS email_id,
                     s.record_status
                 FROM sgs_student_master s
                 LEFT JOIN sgs_class_master c
                     ON s.class_id = c.class_id
+                LEFT JOIN sgs_parent_student_map spm
+                    ON s.student_id = spm.student_id
+                LEFT JOIN sgs_parent_master p
+                    ON spm.parent_id = p.parent_id
                 WHERE s.record_status = 'Active'
                 ORDER BY s.student_id;
-            """)
-            return cur.fetchall()
-
-
-@router.get("/attendance")
-def get_attendance():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    a.attendance_id,
-                    a.student_id,
-                    s.full_name,
-                    c.class_name,
-                    c.section_name,
-                    a.attendance_date,
-                    a.attendance_status,
-                    a.remarks
-                FROM sgs_student_attendance a
-                LEFT JOIN sgs_student_master s
-                    ON a.student_id = s.student_id
-                LEFT JOIN sgs_class_master c
-                    ON s.class_id = c.class_id
-                ORDER BY a.attendance_id;
             """)
             return cur.fetchall()
 
@@ -69,7 +52,10 @@ def get_progress():
                     e.exam_type,
                     sm.marks_obtained,
                     sm.max_marks,
-                    ROUND((sm.marks_obtained / sm.max_marks) * 100, 2) AS percentage,
+                    ROUND(
+                        (sm.marks_obtained::numeric / NULLIF(sm.max_marks, 0)) * 100,
+                        2
+                    ) AS percentage,
                     sm.grade,
                     sm.remarks,
                     sm.record_status
@@ -85,31 +71,4 @@ def get_progress():
                 WHERE sm.record_status = 'Active'
                 ORDER BY sm.marks_id;
             """)
-            return cur.fetchall()
-
-
-@router.get("/ai-student-analysis")
-def get_ai_student_analysis():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    a.analysis_id,
-                    a.student_id,
-                    s.full_name,
-                    c.class_name,
-                    c.section_name,
-                    a.attendance_percentage,
-                    a.performance_score,
-                    a.risk_level,
-                    a.topper_prediction,
-                    a.weak_subject,
-                    a.ai_remarks
-                FROM sgs_ai_student_analysis a
-                LEFT JOIN sgs_student_master s
-                    ON a.student_id = s.student_id
-                LEFT JOIN sgs_class_master c
-                    ON s.class_id = c.class_id
-                ORDER BY a.analysis_id;
-            """)
-            return cur.fetchall()
+            return rows_to_dict(cur)

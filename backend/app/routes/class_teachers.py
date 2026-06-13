@@ -26,7 +26,7 @@ def get_class_teachers():
 
                 FROM sgs_class_master c
 
-                LEFT JOIN sgs_users_master u
+                LEFT JOIN sgs_users_masters u
                 ON c.class_teacher_id = u.user_id
 
                 WHERE c.record_status='Active'
@@ -34,3 +34,5 @@ def get_class_teachers():
                 ORDER BY c.class_id;
             """)
             return rows_to_dict(cur)
+
+                                                
