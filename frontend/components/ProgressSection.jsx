@@ -1,120 +1,132 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ProgressSection({ progressData = [] }) {
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedStudentKey, setSelectedStudentKey] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
+  const urlClass = searchParams.get("class") || "";
+  const urlStudent = searchParams.get("student") || "";
+
+  // -------- UPDATE URL ----------
+  const updateURL = (cls, student) => {
+    const params = new URLSearchParams();
+
+    if (cls) params.set("class", cls);
+    if (student) params.set("student", student);
+
+    router.push(`?${params.toString()}`);
+  };
+
+  // -------- CLASS LIST ----------
   const classTabs = useMemo(() => {
     return [
       ...new Set(
-        progressData
-          .filter((item) => item.class_name && item.section_name)
-          .map((item) => `${item.class_name} - Section ${item.section_name}`)
+        progressData.map(
+          (item) => `${item.class_name} - Section ${item.section_name}`
+        )
       ),
     ];
   }, [progressData]);
 
+  // -------- CLASS DATA ----------
   const classData = progressData.filter(
-    (item) => `${item.class_name} - Section ${item.section_name}` === selectedClass
+    (item) =>
+      `${item.class_name} - Section ${item.section_name}` === urlClass
   );
 
+  // -------- STUDENTS ----------
   const students = [
     ...new Map(
       classData.map((item) => [item.student_id || item.full_name, item])
     ).values(),
   ];
 
+  // -------- SELECTED STUDENT ----------
   const selectedStudent = students.find(
-    (student) => String(student.student_id || student.full_name) === selectedStudentKey
+    (s) => String(s.student_id || s.full_name) === urlStudent
   );
 
   const studentRecords = selectedStudent
     ? classData.filter(
         (item) =>
-          (item.student_id && item.student_id === selectedStudent.student_id) ||
+          item.student_id === selectedStudent.student_id ||
           item.full_name === selectedStudent.full_name
       )
     : [];
 
-  const examNames = [
-    ...new Set(studentRecords.map((item) => item.exam_name).filter(Boolean)),
-  ];
-
-  const subjects = [
-    ...new Set(studentRecords.map((item) => item.subject_name).filter(Boolean)),
-  ];
-
+  // -------- HELPERS ----------
   const getAverage = () => {
-    if (studentRecords.length === 0) return "0.00";
+    if (!studentRecords.length) return "0.00";
     const total = studentRecords.reduce(
-      (sum, item) => sum + Number(item.percentage || 0),
+      (sum, i) => sum + Number(i.percentage || 0),
       0
     );
     return (total / studentRecords.length).toFixed(2);
   };
 
   const getBestSubject = () => {
-    if (studentRecords.length === 0) return "-";
+    const map = {};
 
-    const subjectTotals = {};
+    studentRecords.forEach((i) => {
+      if (!i.subject_name) return;
+      if (!map[i.subject_name]) map[i.subject_name] = { t: 0, c: 0 };
 
-    studentRecords.forEach((item) => {
-      if (!item.subject_name) return;
-
-      if (!subjectTotals[item.subject_name]) {
-        subjectTotals[item.subject_name] = { total: 0, count: 0 };
-      }
-
-      subjectTotals[item.subject_name].total += Number(item.percentage || 0);
-      subjectTotals[item.subject_name].count += 1;
+      map[i.subject_name].t += Number(i.percentage || 0);
+      map[i.subject_name].c += 1;
     });
 
-    let bestSubject = "-";
-    let bestAverage = -1;
+    let best = "-";
+    let bestAvg = -1;
 
-    Object.entries(subjectTotals).forEach(([subject, data]) => {
-      const average = data.total / data.count;
-      if (average > bestAverage) {
-        bestAverage = average;
-        bestSubject = subject;
+    Object.entries(map).forEach(([sub, d]) => {
+      const avg = d.t / d.c;
+      if (avg > bestAvg) {
+        bestAvg = avg;
+        best = sub;
       }
     });
 
-    return bestSubject;
+    return best;
   };
 
   const getMarks = (subject, exam) => {
     const record = studentRecords.find(
-      (item) => item.subject_name === subject && item.exam_name === exam
+      (i) => i.subject_name === subject && i.exam_name === exam
     );
-
-    if (!record) return "-";
-
-    return record.marks_obtained ?? "-";
+    return record?.marks_obtained ?? "-";
   };
 
+  const examNames = [
+    ...new Set(studentRecords.map((i) => i.exam_name).filter(Boolean)),
+  ];
+
+  const subjects = [
+    ...new Set(studentRecords.map((i) => i.subject_name).filter(Boolean)),
+  ];
+
+  // ================= UI =================
   return (
     <div className="page-card">
       <div className="page-header">
         <h2>Student Progress</h2>
       </div>
 
+      {/* -------- BREADCRUMB -------- */}
       <div className="progress-breadcrumb">
         Progress
-        {selectedClass && (
+
+        {urlClass && (
           <>
             <span>›</span>
-            <button
-              onClick={() => {
-                setSelectedStudentKey("");
-              }}
-            >
-              {selectedClass}
+            <button onClick={() => updateURL("", "")}>
+              {urlClass}
             </button>
           </>
         )}
+
         {selectedStudent && (
           <>
             <span>›</span>
@@ -123,116 +135,101 @@ export default function ProgressSection({ progressData = [] }) {
         )}
       </div>
 
-      {!selectedClass && (
+      {/* -------- CLASS GRID -------- */}
+      {!urlClass && (
         <div className="progress-class-grid">
-          {classTabs.map((className) => {
-  const count = progressData.filter(
-    (item) =>
-      `${item.class_name} - Section ${item.section_name}` === className
-  ).reduce((acc, item) => {
-    const key = item.student_id || item.full_name;
-    return acc.includes(key) ? acc : [...acc, key];
-  }, []).length;
-
-  return (
-    <button
-      key={className}
-      className="progress-class-card"
-      onClick={() => setSelectedClass(className)}
-    >
-      <div className="progress-class-name">{className}</div>
-      <div className="progress-class-count">{count} Students</div>
-    </button>
-  );
-})}
+          {classTabs.map((className) => (
+            <button
+              key={className}
+              className="progress-class-card"
+              onClick={() => updateURL(className, "")}
+            >
+              {className}
+            </button>
+          ))}
         </div>
       )}
 
-      {selectedClass && !selectedStudent && (
+      {/* -------- STUDENT LIST -------- */}
+      {urlClass && !urlStudent && (
         <>
           <h3 className="progress-subtitle">
-            {selectedClass} • {students.length} Students
+            {urlClass} • {students.length} Students
           </h3>
 
-          <div className="progress-student-table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Roll No</th>
-                  <th>Student Name</th>
-                </tr>
-              </thead>
+          <table>
+            <tbody>
+              {students.map((student) => {
+                const key = String(student.student_id || student.full_name);
 
-              <tbody>
-                {students.map((student) => (
+                return (
                   <tr
-                    key={student.student_id || student.full_name}
-                    onClick={() =>
-                      setSelectedStudentKey(
-                        String(student.student_id || student.full_name)
-                      )
-                    }
+                    key={key}
                     className="clickable-row"
+                    onClick={() => updateURL(urlClass, key)}
                   >
                     <td>{student.roll_no || "-"}</td>
                     <td>{student.full_name || "-"}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+            </tbody>
+          </table>
         </>
       )}
 
+      {/* -------- STUDENT DETAILS -------- */}
       {selectedStudent && (
-        <>
-          <div className="progress-summary-grid">
-            <div className="progress-summary-card">
-              <span>Student</span>
-              <strong>{selectedStudent.full_name || "-"}</strong>
-            </div>
+    <>
+     <div className="progress-summary-grid">
+      <div className="progress-summary-card">
+        <span>Student</span>
+        <strong>{selectedStudent.full_name || "-"}</strong>
+      </div>
 
-            <div className="progress-summary-card">
-              <span>Overall Performance</span>
-              <strong>{getAverage()}%</strong>
-            </div>
+      <div className="progress-summary-card">
+        <span>Overall Performance</span>
+        <strong>{getAverage()}%</strong>
+      </div>
 
-            <div className="progress-summary-card">
-              <span>Best Subject</span>
-              <strong>{getBestSubject()}</strong>
-            </div>
+      <div className="progress-summary-card">
+        <span>Best Subject</span>
+        <strong>{getBestSubject()}</strong>
+      </div>
 
-            <div className="progress-summary-card">
-              <span>Exams Taken</span>
-              <strong>{examNames.length}</strong>
-            </div>
-          </div>
+      <div className="progress-summary-card">
+        <span>Exams Taken</span>
+        <strong>{examNames.length}</strong>
+      </div>
+    </div>
 
-          <div className="progress-table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Subject</th>
-                  {examNames.map((exam) => (
-                    <th key={exam}>{exam}</th>
-                  ))}
-                </tr>
-              </thead>
+    <div className="progress-table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            {examNames.map((e) => (
+              <th key={e}>{e}</th>
+            ))}
+          </tr>
+        </thead>
 
-              <tbody>
-                {subjects.map((subject) => (
-                  <tr key={subject}>
-                    <td>{subject}</td>
-                    {examNames.map((exam) => (
-                      <td key={`${subject}-${exam}`}>{getMarks(subject, exam)}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
+        <tbody>
+          {subjects.map((sub) => (
+            <tr key={sub}>
+              <td>{sub}</td>
+              {examNames.map((ex) => (
+                <td key={`${sub}-${ex}`}>
+                  {getMarks(sub, ex)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+   </> 
+   )}
     </div>
   );
 }

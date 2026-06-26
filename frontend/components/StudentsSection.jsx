@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-export default function StudentsSection({ students = [], searchText = "" }) {
+export default function StudentsSection({
+  students = [],
+  searchText = "",
+  loaded = false,
+}) {
   const tabs = [
     ...new Set(
       students
@@ -67,26 +71,25 @@ const filteredStudents = students.filter((student) => {
             <th>Email</th>
           </tr>
         </thead>
-
-        <tbody>
-          {filteredStudents.length === 0 ? (
-            <tr>
-              <td colSpan="7">No students found</td>
-            </tr>
-          ) : (
-            filteredStudents.map((student, index) => (
-              <tr key={`${student.student_id}-${index}`}>
-                <td>{student.admission_no || "-"}</td>
-                <td>{student.full_name || "-"}</td>
-                <td>{student.class_name || "-"}</td>
-                <td>{student.section_name || "-"}</td>
-                <td>{student.parent_name || "-"}</td>
-                <td>{student.mobile_no || "-"}</td>
-                <td>{student.email_id || "-"}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
+<tbody>
+  {!loaded ? null : filteredStudents.length === 0 ? (
+    <tr>
+      <td colSpan="7">No students found</td>
+    </tr>
+  ) : (
+    filteredStudents.map((student, index) => (
+      <tr key={`${student.student_id}-${index}`}>
+        <td>{student.admission_no || "-"}</td>
+        <td>{student.full_name || "-"}</td>
+        <td>{student.class_name || "-"}</td>
+        <td>{student.section_name || "-"}</td>
+        <td>{student.parent_name || "-"}</td>
+        <td>{student.mobile_no || "-"}</td>
+        <td>{student.email_id || "-"}</td>
+      </tr>
+    ))
+  )}
+</tbody>
       </table>
     </div>
   );

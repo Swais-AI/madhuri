@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
+
 import DashboardSection from "../components/DashboardSection";
 import StudentsSection from "../components/StudentsSection";
 import TeachersSection from "../components/TeachersSection";
@@ -14,134 +15,199 @@ import FunctionsSection from "../components/FunctionsSection";
 import ToursSection from "../components/ToursSection";
 import ClassTeachersSection from "../components/ClassTeachersSection";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+// ================= API SETUP =================
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  timeout: 10000, // production safety
+});
 
+// ================= MAIN PAGE =================
 export default function HomePage() {
   const fetched = useRef(false);
 
   const [activeTab, setActiveTab] = useState("dashboard");
 
+  const [loading, setLoading] = useState(false);
+
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [classTeachers, setClassTeachers] = useState([]);
-  const [performanceData, setPerformanceData] = useState([]);
-  const [pieData, setPieData] = useState([]);
   const [functionsData, setFunctionsData] = useState([]);
   const [toursData, setToursData] = useState([]);
+
   const [dashboardSummary, setDashboardSummary] = useState({});
+  const [performanceData, setPerformanceData] = useState([]);
+  const [pieData, setPieData] = useState([]);
   const [headmaster, setHeadmaster] = useState(null);
 
+  const [unreadCount, setUnreadCount] = useState(0);
   const [searchText, setSearchText] = useState("");
-  const [loading, setLoading] = useState(false);
 
+  const [loaded, setLoaded] = useState({
+    students: false,
+    teachers: false,
+    progress: false,
+    notifications: false,
+    functions: false,
+    tours: false,
+    classTeachers: false,
+  });
+
+  // ================= DASHBOARD LOAD =================
   useEffect(() => {
     if (fetched.current) return;
     fetched.current = true;
 
-    async function loadDashboardData() {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+
+        // ✅ FIXED: dashboard-core → dashboard
+        const res = await api.get("/dashboard/");
+        const data = res.data;
+
+        setDashboardSummary(data.summary || {});
+        setPerformanceData(data.performance || []);
+        setPieData(data.pass_fail || []);
+        setHeadmaster(data.headmaster || null);
+        setUnreadCount(data.unread_count || 0);
+
+      } catch (err) {
+        console.error("Dashboard API Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, []);
+
+  // ================= TAB HANDLER =================
+  const handleTabChange = async (tab) => {
+    setActiveTab(tab);
+
+    try {
       setLoading(true);
 
-      const results = await Promise.allSettled([
-        axios.get(`${BASE_URL}/students`),
-        axios.get(`${BASE_URL}/teachers`),
-        axios.get(`${BASE_URL}/progress`),
-        axios.get(`${BASE_URL}/notifications`),
-        axios.get(`${BASE_URL}/class-teachers`),
-        axios.get(`${BASE_URL}/performance-chart`),
-        axios.get(`${BASE_URL}/pass-fail-chart`),
-        axios.get(`${BASE_URL}/functions`),
-        axios.get(`${BASE_URL}/tours`),
-        axios.get(`${BASE_URL}/dashboard-summary`),
-        axios.get(`${BASE_URL}/headmaster`),
-      ]);
+      // ================= STUDENTS =================
+      if (tab === "students" && !loaded.students) {
+        const res = await api.get("/students/");
+        setStudents(res.data || []);
+        setLoaded((p) => ({ ...p, students: true }));
+      }
 
-      const getData = (index, fallback) =>
-        results[index]?.status === "fulfilled"
-          ? results[index].value.data
-          : fallback;
+      // ================= TEACHERS =================
+      if (tab === "teachers" && !loaded.teachers) {
+        const res = await api.get("/teachers/");
+        setTeachers(res.data || []);
+        setLoaded((p) => ({ ...p, teachers: true }));
+      }
 
-      setStudents(getData(0, []));
-      setTeachers(getData(1, []));
-      setProgressData(getData(2, []));
-      const notificationData = getData(3, []);
+      // ================= PROGRESS =================
+      if (tab === "progress" && !loaded.progress) {
+        const res = await api.get("/students/progress"); // FIXED
+        setProgressData(res.data || []);
+        setLoaded((p) => ({ ...p, progress: true }));
+      }
 
-setNotifications(notificationData);
+      // ================= NOTIFICATIONS =================
+      if (tab === "notifications" && !loaded.notifications) {
+        const res = await api.get("/notifications/");
+        console.log("Notification API:", res.data);
+        setNotifications(res.data || []);
+        setLoaded((p) => ({ ...p, notifications: true }));
+      }
 
-setUnreadCount(
-  notificationData.filter((item) => item.is_read === false).length
-);
-      setClassTeachers(getData(4, []));
-      setPerformanceData(getData(5, []));
-      setPieData(getData(6, []));
-      setFunctionsData(getData(7, []));
-      setToursData(getData(8, []));
-      setDashboardSummary(getData(9, {}));
-      setHeadmaster(getData(10, null));
+      // ================= FUNCTIONS =================
+      if (tab === "functions" && !loaded.functions) {
+        const res = await api.get("/functions/");
+        setFunctionsData(res.data || []);
+        setLoaded((p) => ({ ...p, functions: true }));
+      }
 
+      // ================= TOURS =================
+      if (tab === "tours" && !loaded.tours) {
+        const res = await api.get("/tours/");
+        setToursData(res.data || []);
+        setLoaded((p) => ({ ...p, tours: true }));
+      }
+
+      // ================= CLASS TEACHERS =================
+      if (tab === "classTeachers" && !loaded.classTeachers) {
+        const res = await api.get("/class-teachers/");
+        setClassTeachers(res.data || []);
+        setLoaded((p) => ({ ...p, classTeachers: true }));
+      }
+
+    } catch (err) {
+      console.error("Tab API Error:", err);
+    } finally {
       setLoading(false);
     }
+  };
 
-    loadDashboardData();
-  }, []);
-const searchItems = (items, keys) => {
-  if (!searchText.trim()) return items || [];
+  // ================= SEARCH =================
+  const searchItems = (items, keys) => {
+    if (!searchText.trim()) return items || [];
 
-  const search = searchText.trim().toLowerCase();
+    const search = searchText.toLowerCase();
 
-  return (items || []).filter((item) =>
-    keys.some((key) => {
-      const value = String(item?.[key] || "").trim().toLowerCase();
-      return value.includes(search);
-    })
-  );
-};
+    return (items || []).filter((item) =>
+      keys.some((key) =>
+        String(item?.[key] || "")
+          .toLowerCase()
+          .includes(search)
+      )
+    );
+  };
 
-const handleTabChange = async (tab) => {
-  setActiveTab(tab);
-
-  if (tab === "notifications") {
-    await axios.put(`${BASE_URL}/notifications/mark-read`);
-
-    setUnreadCount(0);
-  }
-};
-
+  // ================= UI =================
   return (
     <div className="layout">
+
       <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       <div className="main-content">
+
         <Topbar
           headmaster={headmaster}
           searchText={searchText}
           setSearchText={setSearchText}
           notificationCount={unreadCount}
-
         />
 
-        {loading && <div className="loading-text">Loading...</div>}
+        {/* Optional loading indicator */}
+        {loading && (
+          <div style={{ padding: "10px" }}>
+            Loading...
+          </div>
+        )}
 
         {activeTab === "dashboard" && (
           <DashboardSection
-            dashboardSummary={dashboardSummary || {}}
-            performanceData={performanceData || []}
-            pieData={pieData || []}
+            dashboardSummary={dashboardSummary}
+            performanceData={performanceData}
+            pieData={pieData}
           />
         )}
+
         {activeTab === "students" && (
-        <StudentsSection
-        students={students}
-        searchText={searchText}
-  />
-)}
+          <StudentsSection
+            students={students}
+            searchText={searchText}
+            loaded={loaded.students}
+
+          />
+        )}
+
         {activeTab === "teachers" && (
           <TeachersSection
             teachers={searchItems(teachers, [
               "full_name",
               "subject_name",
+              "teacher_id",
               "role",
               "email_id",
               "phone",
@@ -160,51 +226,43 @@ const handleTabChange = async (tab) => {
             ])}
           />
         )}
-
         {activeTab === "notifications" && (
-          <NotificationsSection
-            notifications={searchItems(notifications, [
-              "notice_title",
-              "notice_text",
-              "applicable_class",
-            ])}
-          />
-        )}
+        <NotificationsSection
+        notifications={searchItems(notifications, [
+        "notice_title",
+        "notice_text",
+        "notice_date",
+    ])}
+    loaded={loaded.notifications}
+  />
+)}
 
-        {activeTab === "functions" && (
-          <FunctionsSection
-            functionsData={searchItems(functionsData, [
-              "function_name",
-              "coordinator_name",
-              "status",
-              "description",
-            ])}
-          />
-        )}
+{activeTab === "functions" && (
+  <FunctionsSection
+    functionsData={searchItems(functionsData, [
+      "function_name",
+      "description",
+    ])}
+  />
+)}
 
-        {activeTab === "tours" && (
-          <ToursSection
-            toursData={searchItems(toursData, [
-              "tour_name",
-              "location_name",
-              "incharge_name",
-              "status",
-            ])}
-          />
-        )}
+{activeTab === "tours" && (
+  <ToursSection
+    toursData={searchItems(toursData, [
+      "tour_name",
+      "destination",
+    ])}
+  />
+)}
 
-        {activeTab === "classTeachers" && (
-          <ClassTeachersSection
-            classTeachers={searchItems(classTeachers, [
-              "class_name",
-              "section_name",
-              "academic_year",
-              "class_teacher_name",
-              "teacher_email",
-              "teacher_mobile",
-            ])}
-          />
-        )}
+{activeTab === "classTeachers" && (
+  <ClassTeachersSection
+    classTeachers={searchItems(classTeachers, [
+      "teacher_name",
+      "class_name",
+    ])}
+  />
+)}
       </div>
     </div>
   );

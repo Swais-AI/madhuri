@@ -1,14 +1,39 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from .config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+import os
+from dotenv import load_dotenv
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-def get_connection():
-    return psycopg2.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT,
-        cursor_factory=RealDictCursor
-    )
+# Load .env file
+load_dotenv()
+
+# Get DB URL from environment
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL is not set in .env file")
+
+# Create engine
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
+
+# Session
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+# Base model
+Base = declarative_base()
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

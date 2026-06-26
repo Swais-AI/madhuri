@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   Users,
@@ -10,94 +12,98 @@ import {
   LogOut,
 } from "lucide-react";
 import Image from "next/image";
-export default function Sidebar({
-  activeTab,
-  setActiveTab,
-}) {
+import LogoutModal from "@/components/LogoutModal";
 
-const menuItems = [
+export default function Sidebar({ activeTab, setActiveTab }) {
+  const router = useRouter();
 
-{ id:"dashboard",label:"Dashboard",icon:Home },
+  // ✅ ADD STATE FOR MODAL
+  const [showLogout, setShowLogout] = useState(false);
 
-{ id:"students",label:"Students",icon:Users },
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "students", label: "Students", icon: Users },
+    { id: "teachers", label: "Teachers", icon: GraduationCap },
+    { id: "progress", label: "Progress", icon: TrendingUp },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "functions", label: "Functions", icon: CalendarDays },
+    { id: "tours", label: "Tours", icon: MapPinned },
+    { id: "classTeachers", label: "Class Teachers", icon: UserCheck },
 
-{ id:"teachers",label:"Teachers",icon:GraduationCap },
+    // logout item stays same
+    { id: "logout", label: "Logout", icon: LogOut, danger: true },
+  ];
 
-{ id:"progress",label:"Progress",icon:TrendingUp },
+  // ✅ LOGOUT LOGIC
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    sessionStorage.clear();
 
-{ id: "notifications", label: "Notifications", icon: Bell },
+    // clear cookie (if used)
+    document.cookie =
+      "sgs_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 
-{ id:"functions",label:"Functions",icon:CalendarDays },
+    window.location.href = "https://staging.sgs.swais.in";
+  };
 
-{ id:"tours",label:"Tours",icon:MapPinned },
+  const handleClick = (item) => {
+    if (item.id === "logout") {
+      setShowLogout(true); // ✅ open modal instead of confirm
+      return;
+    }
 
-{ id:"classTeachers",label:"Class Teachers",icon:UserCheck }
-
-];
-
-return(
-
-<div className="sidebar">
-
-<div>
-
-<div className="brand-box">
-
-<div className="logo-circle">
-        <Image
-          src="/school-logo.jpeg"
-          alt="SGS Logo"
-          width={80}
-          height={80}
-          className="school-logo"
-        />
-      </div>
-<h2>SGS SCHOOL</h2>
-
-<p>Headmaster Dashboard</p>
-
-</div>
-
-<div className="menu-list">
-
-{menuItems.map((item)=>{
-
-const Icon=item.icon;
-
-return(
-<button
-  type="button"
-  key={item.id}
-  className={`menu-btn ${activeTab === item.id ? "active" : ""}`}
-  onClick={() => {
-    console.log("Clicked tab:", item.id);
     setActiveTab(item.id);
-  }}
->
+  };
 
-<Icon size={18}/>
+  return (
+    <>
+      <div className="sidebar">
+        <div>
+          {/* BRAND */}
+          <div className="brand-box">
+            <div className="logo-circle">
+              <Image
+                src="/school-logo.jpeg"
+                alt="SGS Logo"
+                width={80}
+                height={80}
+                className="school-logo"
+              />
+            </div>
 
-{item.label}
+            <h2>SGS SCHOOL</h2>
+            <p>Headmaster Dashboard</p>
+          </div>
 
-</button>
-)
+          {/* MENU */}
+          <div className="menu-list">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
 
-})}
+              return (
+                <button
+                  key={item.id}
+                  className={`menu-btn ${
+                    activeTab === item.id ? "active" : ""
+                  } ${item.danger ? "logout-style" : ""}`}
+                  onClick={() => handleClick(item)}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-</div>
-
-</div>
-
-<button className="logout-btn">
-
-<LogOut size={18}/>
-
-Logout
-
-</button>
-
-</div>
-
-)
-
+      {/* ✅ LOGOUT MODAL (ADD HERE - OUTSIDE SIDEBAR DIV) */}
+      <LogoutModal
+        open={showLogout}
+        onCancel={() => setShowLogout(false)}
+        onConfirm={handleLogout}
+      />
+    </>
+  );
 }

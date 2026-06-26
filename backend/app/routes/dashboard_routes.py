@@ -1,213 +1,107 @@
-from fastapi import APIRouter
-from app.database import get_connection
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
+from app.database import get_db
 
 router = APIRouter()
 
+# ================= OPTIMIZED QUERY =================
+DASHBOARD_QUERY = """
+WITH
+summary AS (
+    SELECT
+        (SELECT COUNT(*) FROM sgs_student_master WHERE record_status = 'Active') AS total_students,
+        (SELECT COUNT(*) FROM sgs_teacher_master WHERE is_active = TRUE) AS total_teachers,
+        (SELECT COUNT(*) FROM sgs_class_master WHERE record_status = 'Active') AS total_classes,
+        (SELECT ROUND(AVG(marks_obtained), 2)
+         FROM sgs_student_marks
+         WHERE record_status = 'Active') AS average_marks,
+        (SELECT ROUND(
+            (SUM(CASE WHEN marks_obtained >= 33 THEN 1 ELSE 0 END)::numeric /
+             NULLIF(COUNT(*), 0)) * 100,
+            2
+        )
+         FROM sgs_student_marks
+         WHERE record_status = 'Active') AS pass_percentage
+),
+performance AS (
+    SELECT COALESCE(json_agg(t), '[]'::json) AS data
+    FROM (
+        SELECT
+            c.class_name,
+            c.section_name,
+            ROUND(
+                AVG((m.marks_obtained / NULLIF(m.max_marks, 0)) * 100),
+                2
+            ) AS percentage
+        FROM sgs_student_marks m
+        JOIN sgs_student_master s ON m.student_id = s.student_id
+        JOIN sgs_class_master c ON s.class_id = c.class_id
+        WHERE m.record_status = 'Active'
+        GROUP BY c.class_name, c.section_name
+        ORDER BY c.class_name, c.section_name
+    ) t
+),
+pass_fail AS (
+    SELECT
+        SUM(CASE WHEN marks_obtained >= 33 THEN 1 ELSE 0 END) AS pass_count,
+        SUM(CASE WHEN marks_obtained < 33 THEN 1 ELSE 0 END) AS fail_count
+    FROM sgs_student_marks
+    WHERE record_status = 'Active'
+),
+headmaster AS (
+    SELECT COALESCE(json_build_object(
+        'full_name', u.full_name,
+        'role_name', r.role_name
+    ), '{}'::json) AS data
+    FROM sgs_users_masters u
+    JOIN sgs_role_response r ON r.role_id = u.role_id
+    WHERE LOWER(r.role_name) = 'headmaster'
+      AND u.is_active = TRUE
+      AND u.record_status = 'Active'
+    LIMIT 1
+),
+notifications AS (
+    SELECT COUNT(*) AS unread_count
+    FROM sgs_notice_board
+    WHERE is_read = FALSE
+)
 
-def rows_to_dict(cursor):
-    return [dict(row) for row in cursor.fetchall()]
+SELECT
+    (SELECT row_to_json(summary) FROM summary) AS summary,
+    (SELECT data FROM performance) AS performance,
+    (SELECT row_to_json(pass_fail) FROM pass_fail) AS pass_fail,
+    (SELECT data FROM headmaster) AS headmaster,
+    (SELECT unread_count FROM notifications) AS unread_count;
+"""
 
+# ================= API =================
+@router.get("/")
+def dashboard_core(db: Session = Depends(get_db)):
 
-def row_to_dict(cursor):
-    row = cursor.fetchone()
-    return dict(row) if row else {}
+    result = db.execute(text(DASHBOARD_QUERY)).mappings().fetchone()
 
+    if not result:
+        return {
+            "summary": {},
+            "performance": [],
+            "pass_fail": [{"name": "Pass", "value": 0}, {"name": "Fail", "value": 0}],
+            "headmaster": {},
+            "unread_count": 0
+        }
 
-@router.get("/classes")
-def get_classes():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    class_id,
-                    class_name,
-                    section_name,
-                    academic_year,
-                    record_status
-                FROM sgs_class_master
-                ORDER BY class_id;
-            """)
-            return rows_to_dict(cur)
+    row = dict(result)
 
+    pass_fail = row.get("pass_fail") or {}
 
-@router.get("/subjects")
-def get_subjects():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    s.subject_id,
-                    s.subject_name,
-                    s.subject_code,
-                    s.class_id,
-                    c.class_name,
-                    c.section_name,
-                    s.teacher_id,
-                    t.full_name AS teacher_name
-                FROM sgs_subject_master s
-                LEFT JOIN sgs_class_master c
-                    ON s.class_id = c.class_id
-                LEFT JOIN sgs_teacher_master t
-                    ON s.teacher_id = t.teacher_id
-                ORDER BY s.subject_id;
-            """)
-            return rows_to_dict(cur)
-
-
-@router.get("/exams")
-def get_exams():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    exam_id,
-                    exam_name,
-                    academic_year,
-                    exam_type,
-                    start_date,
-                    end_date
-                FROM sgs_exam_master
-                ORDER BY exam_id;
-            """)
-            return rows_to_dict(cur)
-
-
-@router.get("/notifications")
-def get_notifications():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    notice_id,
-                    notice_title,
-                    notice_text,
-                    notice_date,
-                    applicable_class,
-                    is_read
-                FROM sgs_notice_board
-                ORDER BY notice_id DESC;
-            """)
-            return rows_to_dict(cur)
-        
-@router.put("/notifications/mark-read")
-def mark_notifications_read():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                UPDATE sgs_notice_board
-                SET is_read = TRUE
-                WHERE is_read = FALSE;
-            """)
-            conn.commit()
-
-    return {"message": "Success"}        
-
-
-@router.get("/functions")
-def get_functions():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    function_id,
-                    function_name,
-                    function_date,
-                    coordinator_name,
-                    participants_count,
-                    status,
-                    description,
-                    record_status    
-                FROM sgs_school_functions
-                WHERE record_status = 'Active'
-                ORDER BY function_id DESC;
-            """)
-            return rows_to_dict(cur)
-
-
-@router.get("/tours")
-def get_tours():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    tour_id,
-                    tour_name,
-                    location_name,
-                    tour_date,
-                    incharge_name,
-                    students_count,
-                    record_status
-                FROM sgs_school_tours
-                WHERE record_status = 'Active'
-                ORDER BY tour_id DESC;
-            """)
-            return rows_to_dict(cur)
-
-
-@router.get("/dashboard-summary")
-def dashboard_summary():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    (SELECT COUNT(*) FROM sgs_student_master WHERE record_status = 'Active') AS total_students,
-                    (SELECT COUNT(*) FROM sgs_teacher_master WHERE is_active = TRUE) AS total_teachers,
-                    (SELECT COUNT(*) FROM sgs_class_master WHERE record_status = 'Active') AS total_classes,
-
-                    COALESCE((
-                        SELECT ROUND(AVG(marks_obtained), 2)
-                        FROM sgs_student_marks
-                        WHERE record_status = 'Active'
-                    ), 0) AS average_marks,
-
-                    COALESCE((
-                        SELECT ROUND(
-                            (SUM(CASE WHEN marks_obtained >= 40 THEN 1 ELSE 0 END)::numeric
-                            / NULLIF(COUNT(*), 0)) * 100,
-                            2
-                        )
-                        FROM sgs_student_marks
-                        WHERE record_status = 'Active'
-                    ), 0) AS pass_percentage
-            """)
-            return row_to_dict(cur)
-
-
-@router.get("/performance-chart")
-def performance_chart():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    c.class_name,
-                    c.section_name,
-                    ROUND(AVG((m.marks_obtained / m.max_marks) * 100), 2) AS percentage
-                FROM sgs_student_marks m
-                JOIN sgs_student_master s
-                    ON m.student_id = s.student_id
-                JOIN sgs_class_master c
-                    ON s.class_id = c.class_id
-                WHERE m.record_status = 'Active'
-                GROUP BY c.class_name, c.section_name
-                ORDER BY c.class_name, c.section_name;
-            """)
-            return rows_to_dict(cur)
-
-
-@router.get("/pass-fail-chart")
-def pass_fail_chart():
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT
-                    SUM(CASE WHEN marks_obtained >= 40 THEN 1 ELSE 0 END) AS pass_count,
-                    SUM(CASE WHEN marks_obtained < 40 THEN 1 ELSE 0 END) AS fail_count
-                FROM sgs_student_marks
-                WHERE record_status = 'Active';
-            """)
-            result = row_to_dict(cur)
-
-    return [
-        {"name": "Pass", "value": result.get("pass_count") or 0},
-        {"name": "Fail", "value": result.get("fail_count") or 0}
-    ]
+    return {
+        "summary": row.get("summary") or {},
+        "performance": row.get("performance") or [],
+        "pass_fail": [
+            {"name": "Pass", "value": pass_fail.get("pass_count", 0)},
+            {"name": "Fail", "value": pass_fail.get("fail_count", 0)}
+        ],
+        "headmaster": row.get("headmaster") or {},
+        "unread_count": row.get("unread_count") or 0
+    }

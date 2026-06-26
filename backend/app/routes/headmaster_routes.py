@@ -1,40 +1,37 @@
-from fastapi import APIRouter
-from ..database import get_connection
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
+from app.database import get_db
 
 router = APIRouter()
 
-@router.get("/headmaster")
-def get_headmaster():
-    conn = get_connection()
-    cursor = conn.cursor()
 
-    try:
-        cursor.execute("""
-            SELECT 
-                u.full_name,
-                r.role_name
-            FROM sgs_users_masters u
-            JOIN sgs_role_response r
-                ON r.role_id = u.role_id
-            WHERE LOWER(r.role_name) = 'headmaster'
-              AND u.is_active = TRUE
-              AND u.record_status = 'Active'
-            LIMIT 1
-        """)
+@router.get("/")
+def get_headmaster(db: Session = Depends(get_db)):
 
-        row = cursor.fetchone()
+    query = """
+        SELECT 
+            u.full_name,
+            r.role_name
+        FROM sgs_users_masters u
+        JOIN sgs_role_response r
+            ON r.role_id = u.role_id
+        WHERE LOWER(r.role_name) = 'headmaster'
+          AND u.is_active = TRUE
+          AND u.record_status = 'Active'
+        LIMIT 1
+    """
 
-        if row:
-            return {
-                "name": row["full_name"],
-                "role": row["role_name"]
-            }
+    row = db.execute(text(query)).mappings().fetchone()
 
+    if row:
         return {
-            "name": "",
-            "role": "Headmaster"
+            "name": row["full_name"],
+            "role": row["role_name"]
         }
 
-    finally:
-        cursor.close()
-        conn.close()
+    return {
+        "name": "",
+        "role": "Headmaster"
+    }
