@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import useAuthGuard from "@/hooks/useAuthGuard";
 import axios from "axios";
 
 import Sidebar from "../components/Sidebar";
@@ -23,6 +24,7 @@ const api = axios.create({
 
 // ================= MAIN PAGE =================
 export default function HomePage() {
+  //useAuthGuard();
   const fetched = useRef(false);
 
   const [activeTab, setActiveTab] = useState("dashboard");
