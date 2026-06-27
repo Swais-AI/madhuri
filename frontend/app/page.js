@@ -24,7 +24,7 @@ const api = axios.create({
 
 // ================= MAIN PAGE =================
 export default function HomePage() {
-  //useAuthGuard();
+  useAuthGuard();
   const fetched = useRef(false);
 
   const [activeTab, setActiveTab] = useState("dashboard");
