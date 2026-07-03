@@ -55,22 +55,21 @@ export default function Topbar({
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleVoiceInput = () => {
-    startVoice((text) => {
-      if (!text) return;
+ const handleVoiceInput = () => {
+  startVoice(async (text) => {
+    if (!text) return;
 
-      setSearchText("");
+    try {
+      const translated = await translateText(text, language);
 
-      let i = 0;
+      setSearchText(translated);
 
-      const interval = setInterval(() => {
-        setSearchText(text.slice(0, i));
-        i++;
-
-        if (i > text.length) clearInterval(interval);
-      }, 12);
-    });
-  };
+      speakText(translated);
+    } catch (error) {
+      console.error("Translation Error:", error);
+    }
+  });
+};
 
   return (
     <div className="topbar">

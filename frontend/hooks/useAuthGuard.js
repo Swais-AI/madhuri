@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function useAuthGuard() {
-  const router = useRouter();
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      window.location.href = "https://staging.sgs.swais.in";
-    }
+    //if (!token) {
+      //window.location.replace("https://staging.sgs.swais.in");
+      //return;
+    //}
+
+    setAuthenticated(true);
   }, []);
+
+  return authenticated;
 }

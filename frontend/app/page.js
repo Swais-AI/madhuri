@@ -24,17 +24,17 @@ const api = axios.create({
 
 // ================= MAIN PAGE =================
 export default function HomePage() {
-  useAuthGuard();
+  const isCheckingAuth = useAuthGuard();
   const fetched = useRef(false);
 
   const [activeTab, setActiveTab] = useState("dashboard");
-
   const [loading, setLoading] = useState(false);
 
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
   const [notifications, setNotifications] = useState([]);
+
   const [classTeachers, setClassTeachers] = useState([]);
   const [functionsData, setFunctionsData] = useState([]);
   const [toursData, setToursData] = useState([]);
@@ -57,6 +57,15 @@ export default function HomePage() {
     classTeachers: false,
   });
 
+  // ✅ NOW put auth check HERE (IMPORTANT)
+  if (isCheckingAuth) {
+    return (
+      <div style={{ padding: "20px" }}>
+        Checking authentication...
+      </div>
+    );
+  }
+
   // ================= DASHBOARD LOAD =================
   useEffect(() => {
     if (fetched.current) return;
@@ -66,7 +75,6 @@ export default function HomePage() {
       try {
         setLoading(true);
 
-        // ✅ FIXED: dashboard-core → dashboard
         const res = await api.get("/dashboard/");
         const data = res.data;
 
@@ -85,7 +93,6 @@ export default function HomePage() {
 
     loadDashboard();
   }, []);
-
   // ================= TAB HANDLER =================
   const handleTabChange = async (tab) => {
     setActiveTab(tab);
@@ -165,6 +172,16 @@ export default function HomePage() {
     );
   };
 
+  const translateText = async (text, language) => {
+  const response = await api.post("/headmaster/translate", {
+    text,
+    target_language: language,
+    user_info: headmaster,
+  });
+
+  return response.data.translation;
+};
+
   // ================= UI =================
   return (
     <div className="layout">
@@ -178,6 +195,7 @@ export default function HomePage() {
           searchText={searchText}
           setSearchText={setSearchText}
           notificationCount={unreadCount}
+           translateText={translateText}
         />
 
         {/* Optional loading indicator */}
