@@ -57,14 +57,6 @@ export default function HomePage() {
     classTeachers: false,
   });
 
-  // ✅ NOW put auth check HERE (IMPORTANT)
-  if (isCheckingAuth) {
-    return (
-      <div style={{ padding: "20px" }}>
-        Checking authentication...
-      </div>
-    );
-  }
 
   // ================= DASHBOARD LOAD =================
   useEffect(() => {
