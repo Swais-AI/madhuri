@@ -6,8 +6,8 @@ from typing import Literal
 # USER INFO (COMMON MODEL)
 # =========================
 class UserInfo(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    email: str = Field(..., max_length=150)
+    name: str = Field(default="")
+    email: str = Field(default="")
     role: Literal["Headmaster", "Teacher", "Admin"] = "Headmaster"
 
 

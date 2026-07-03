@@ -10,6 +10,7 @@ import {
   Languages,
   Check,
   ChevronDown,
+    Bot,
 } from "lucide-react";
 import useVoice from "../hooks/useVoice";
 
@@ -18,11 +19,16 @@ export default function Topbar({
   searchText,
   setSearchText,
   notificationCount = 0,
+  language,
+  setLanguage,
+   onOpenAI,
+
+  
 }) {
   const { startVoice, listening } = useVoice();
 
   // Language Dropdown
-  const [language, setLanguage] = useState("English");
+ 
   const [showLangMenu, setShowLangMenu] = useState(false);
 
   const langRef = useRef(null);
@@ -112,6 +118,14 @@ export default function Topbar({
 
       {/* RIGHT */}
       <div className="topbar-right">
+      <button
+  className="ai-btn"
+  onClick={onOpenAI}
+  type="button"
+>
+  <Bot size={18} />
+  <span>AI Tools</span>
+</button>
 
         {/* Language */}
         <div className="language-wrapper" ref={langRef}>

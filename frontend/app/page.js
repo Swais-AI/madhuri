@@ -7,6 +7,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 
+import AIToolsModal from "../components/AIToolsModal";
 import DashboardSection from "../components/DashboardSection";
 import StudentsSection from "../components/StudentsSection";
 import TeachersSection from "../components/TeachersSection";
@@ -26,11 +27,13 @@ const api = axios.create({
 export default function HomePage() {
   const isCheckingAuth = useAuthGuard();
   const fetched = useRef(false);
+  
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
 
   const [students, setStudents] = useState([]);
+  const [originalStudents, setOriginalStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -46,6 +49,9 @@ export default function HomePage() {
 
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchText, setSearchText] = useState("");
+  const translationCache = useRef(new Map());
+  const [language, setLanguage] = useState("English");
+  const [openAI, setOpenAI] = useState(false);
 
   const [loaded, setLoaded] = useState({
     students: false,
@@ -93,11 +99,16 @@ export default function HomePage() {
       setLoading(true);
 
       // ================= STUDENTS =================
-      if (tab === "students" && !loaded.students) {
-        const res = await api.get("/students/");
-        setStudents(res.data || []);
-        setLoaded((p) => ({ ...p, students: true }));
-      }
+     if (tab === "students" && !loaded.students) {
+  const res = await api.get("/students/");
+
+  const data = res.data || [];
+
+  setOriginalStudents(data);
+  setStudents(data);
+
+  setLoaded((p) => ({ ...p, students: true }));
+}
 
       // ================= TEACHERS =================
       if (tab === "teachers" && !loaded.teachers) {
@@ -114,12 +125,21 @@ export default function HomePage() {
       }
 
       // ================= NOTIFICATIONS =================
-      if (tab === "notifications" && !loaded.notifications) {
-        const res = await api.get("/notifications/");
-        console.log("Notification API:", res.data);
-        setNotifications(res.data || []);
-        setLoaded((p) => ({ ...p, notifications: true }));
-      }
+     if (tab === "notifications" && !loaded.notifications) {
+  // Fetch notifications
+  const res = await api.get("/notifications/");
+  console.log("Notification API:", res.data);
+
+  setNotifications(res.data || []);
+
+  // Mark all notifications as read
+  await api.put("/notifications/mark-read");
+
+  // Remove the badge immediately
+  setUnreadCount(0);
+
+  setLoaded((p) => ({ ...p, notifications: true }));
+}
 
       // ================= FUNCTIONS =================
       if (tab === "functions" && !loaded.functions) {
@@ -164,16 +184,75 @@ export default function HomePage() {
     );
   };
 
-  const translateText = async (text, language) => {
-  const response = await api.post("/headmaster/translate", {
-    text,
-    target_language: language,
-    user_info: headmaster,
-  });
+  // ================= TRANSLATE FUNCTION =================
 
-  return response.data.translation;
+const translateText = async (text, lang) => {
+  if (!text) return text;
+
+  const key = `${text}_${lang}`;
+
+  if (translationCache.current.has(key)) {
+    return translationCache.current.get(key);
+  }
+
+  let translated = text;
+
+  try {
+    const userInfo = headmaster
+      ? {
+          name: headmaster.name,
+          email: headmaster.email,
+          role: "Headmaster",
+        }
+      : {
+          name: "unknown",
+          email: "unknown",
+          role: "Headmaster",
+        };
+
+    const response = await api.post("/headmaster/translate", {
+      text,
+      target_language: lang,
+      user_info: userInfo,
+    });
+    console.log("API Response:", response.data);
+
+    translated = response.data?.translation || text;
+
+  } catch (err) {
+    console.error("Translate API failed:", err?.response?.data || err.message);
+    translated = text;
+  }
+
+  translationCache.current.set(key, translated);
+
+  return translated;
 };
+useEffect(() => {
+  const runTranslation = async () => {
+    if (language === "English") {
+      setStudents(originalStudents);
+      return;
+    }
 
+    console.log("Starting translation...");
+
+    if (originalStudents.length === 0) return;
+
+    const firstStudent = originalStudents[0];
+
+    console.log("Original Name:", firstStudent.full_name);
+
+    const translatedName = await translateText(
+      firstStudent.full_name,
+      language
+    );
+
+    console.log("Translated Name:", translatedName);
+  };
+
+  runTranslation();
+}, [language]);
   // ================= UI =================
   return (
     <div className="layout">
@@ -187,8 +266,17 @@ export default function HomePage() {
           searchText={searchText}
           setSearchText={setSearchText}
           notificationCount={unreadCount}
-           translateText={translateText}
+          language={language}
+          translateText={translateText}
+          setLanguage={setLanguage}
+          onOpenAI={() => setOpenAI(true)}
+
         />
+       <AIToolsModal
+  open={openAI}
+  onClose={() => setOpenAI(false)}
+/>
+
 
         {/* Optional loading indicator */}
         {loading && (
