@@ -1,0 +1,184 @@
+/* ==========================================
+   Academic Analytics
+========================================== */
+.academic-analytics{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+}
+
+.subtitle{
+    color:#64748b;
+    font-size:14px;
+    margin-top:-8px;
+}
+
+/* ==========================================
+   Filters
+========================================== */
+
+.analytics-filters{
+    display:grid;
+   grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.field label{
+    font-size:14px;
+    font-weight:600;
+    color:#334155;
+}
+
+.field input,
+.field select{
+    height:42px;
+    padding:0 12px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    outline:none;
+    transition:border-color .2s;
+}
+
+.field input:focus,
+.field select:focus{
+    border-color:#2563eb;
+}
+
+/* ==========================================
+   Button
+========================================== */
+
+.analytics-btn{
+    width:220px;
+    height:44px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.analytics-btn:hover{
+    background:#1d4ed8;
+}
+
+/* ==========================================
+   Result Titles
+========================================== */
+
+.analytics-title{
+    margin-bottom:20px;
+    font-size:24px;
+    font-weight:700;
+    color:#1e293b;
+}
+
+.chart-title{
+    margin:30px 0 15px;
+    font-size:20px;
+    font-weight:600;
+    color:#1e293b;
+}
+
+/* ==========================================
+   AI Analysis
+========================================== */
+
+.analysis-container{
+    margin:15px 0 25px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    background:#fff;
+    padding:20px;
+}
+
+.analysis-item{
+    padding:16px 0;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.analysis-item:last-child{
+    border-bottom:none;
+    padding-bottom:0;
+}
+
+.analysis-item:first-child{
+    padding-top:0;
+}
+
+.analysis-item h4{
+    margin:0 0 8px;
+    font-size:17px;
+    font-weight:600;
+    color:#1f2937;
+}
+
+.analysis-item p{
+    margin:0;
+    font-size:15px;
+    line-height:1.8;
+    color:#475569;
+}
+
+/* ==========================================
+   Chart
+========================================== */
+
+.chart-container{
+    margin-top:15px;
+    padding:18px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+}
+
+/* ==========================================
+   Placeholder
+========================================== */
+
+.analytics-placeholder{
+    margin-top:25px;
+    padding:20px;
+    text-align:center;
+    border:2px dashed #cbd5e1;
+    border-radius:10px;
+    color:#64748b;
+    background:#fafafa;
+}
+
+/* ==========================================
+   Responsive
+========================================== */
+
+@media (max-width:900px){
+
+    .analytics-filters{
+        grid-template-columns:1fr;
+    }
+
+    .analytics-btn{
+        width:100%;
+    }
+
+    .analytics-title{
+        font-size:22px;
+    }
+
+    .chart-title{
+        font-size:18px;
+    }
+
+}

@@ -38,7 +38,9 @@ class TeacherPerformanceRequest(BaseModel):
 # =========================
 # 4. TRANSLATE
 # =========================
+from typing import Union, List
+
 class TranslateRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=5000)
+    text: Union[str, List[str]]
     target_language: str = Field(..., min_length=2, max_length=50)
     user_info: UserInfo

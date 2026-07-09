@@ -110,4 +110,8 @@ def translate(
     data = payload.model_dump()
     user_info = data["user_info"]
 
-    return translate_for_headmaster(db, data, user_info)
+    return translate_for_headmaster(
+        db,
+        data,
+        user_info
+    )

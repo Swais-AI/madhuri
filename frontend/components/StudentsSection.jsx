@@ -6,6 +6,7 @@ export default function StudentsSection({
   students = [],
   searchText = "",
   loaded = false,
+  onSectionChange,
 }) {
   const tabs = [
     ...new Set(
@@ -20,11 +21,12 @@ export default function StudentsSection({
 
   const [activeSectionTab, setActiveSectionTab] = useState("");
 
-  useEffect(() => {
-    if (!activeSectionTab && tabs.length > 0) {
-      setActiveSectionTab(tabs[0]);
-    }
-  }, [tabs, activeSectionTab]);
+ useEffect(() => {
+  if (!activeSectionTab && tabs.length > 0) {
+    setActiveSectionTab(tabs[0]);
+    onSectionChange?.(tabs[0]);
+  }
+}, [tabs]);
 const filteredStudents = students.filter((student) => {
   const matchesSearch =
     !searchText ||
@@ -51,7 +53,10 @@ const filteredStudents = students.filter((student) => {
         {tabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveSectionTab(tab)}
+           onClick={() => {
+  setActiveSectionTab(tab);
+  onSectionChange?.(tab);
+}}
             className={activeSectionTab === tab ? "active-student-tab" : ""}
           >
             {tab}

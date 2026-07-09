@@ -1,35 +1,59 @@
 "use client";
 
 import "./AIToolsModal.css";
+import AcademicAnalytics from "./AcademicAnalytics";
+import ReportPanel from "./ReportPanel";
 import { useState } from "react";
 import axios from "axios";
 
-export default function AIToolsModal({
-  open,
-  onClose,
-  headmaster,
-}) {
-  if (!open) return null;
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  LabelList,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 
+const COLORS = [
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#EF4444",
+  "#8B5CF6",
+  "#06B6D4",
+];
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+});
+
+export default function AIToolsModal({ open, onClose, headmaster }) {
+  // =======================
+  // ALL HOOKS FIRST (FIX)
+  // =======================
+  
   const [selectedReport, setSelectedReport] = useState("");
   const [report, setReport] = useState("");
+  const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  });
+  const [student, setStudent] = useState("");
+  const [subject, setSubject] = useState("All Subjects");
+  const [selectedClass, setSelectedClass] = useState("");
+  
+  const [language, setLanguage] = useState("English");
+  const [originalReport, setOriginalReport] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
+  // NOW SAFE CONDITIONAL RETURN
+  if (!open) return null;
 
   const generateReport = async () => {
     if (!selectedReport) {
       alert("Please select a report.");
-      return;
-    }
-
-    // Skip Analytics API for now
-    if (selectedReport === "analytics") {
-      setReport(
-        "📊 Academic Analytics feature is currently unavailable."
-      );
       return;
     }
 
@@ -44,77 +68,172 @@ export default function AIToolsModal({
         },
       };
 
-      let response;
-
-      // Assignment Report
       if (selectedReport === "assignment") {
-        response = await api.post(
-          "/headmaster/assignment-report",
-          payload
-        );
-
-        setReport(response.data.report);
-      }
-
-      // Teacher Performance
+        const res = await api.post("/headmaster/assignment-report", payload);
+        setOriginalReport(res.data.report);
+        setReport(res.data.report);
+        setAnalyticsData(null);
+        setLanguage("English");
+      } 
       else if (selectedReport === "teacher") {
-        response = await api.post(
-          "/headmaster/teacher-performance",
-          payload
-        );
+        const res = await api.post("/headmaster/teacher-performance", payload);
+        setOriginalReport(res.data.report);
+        setReport(res.data.report);
+        setAnalyticsData(null);
+        setLanguage("English");
+      } 
+      else if (selectedReport === "analytics") {
+        if (!student.trim()) {
+          alert("Please enter student name.");
+          setLoading(false);
+          return;
+        }
 
-        setReport(response.data.report);
+        const res = await api.post("/headmaster/academic-analytics", {
+          target_name: student.trim(),
+          target_type: "student",
+          class_name: selectedClass,
+          subject: subject,
+          scope: subject === "All Subjects" ? "all_subjects" : "single_subject",
+          user_info: payload.user_info,
+        });
+
+      setAnalyticsData(res.data);
+setOriginalReport(JSON.stringify(res.data.analysis));
+setReport("");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setReport("Failed to generate report.");
     } finally {
       setLoading(false);
     }
   };
+const translateContent = async (selectedLanguage) => {
+  try {
+    // Restore original English
+    if (selectedLanguage === "English") {
+      if (selectedReport === "analytics") {
+        setAnalyticsData((prev) => ({
+          ...prev,
+          analysis: JSON.parse(originalReport),
+        }));
+      } else {
+        setReport(originalReport);
+      }
+      return;
+    }
+
+    setIsTranslating(true);
+
+    let textToTranslate = "";
+
+    if (selectedReport === "analytics") {
+     if (!analyticsData?.analysis) return;
+
+textToTranslate = JSON.stringify(analyticsData.analysis);
+    } else {
+      textToTranslate = originalReport;
+    }
+
+    const res = await api.post("/headmaster/translate", {
+      text: textToTranslate,
+      target_language: selectedLanguage,
+      user_info: {
+        name: headmaster?.name || "",
+        email: headmaster?.email || "",
+        role: "Headmaster",
+      },
+    });
+
+    if (selectedReport === "analytics") {
+      let translatedAnalysis;
+
+      try {
+        translatedAnalysis = JSON.parse(res.data.translated);
+      } catch {
+        translatedAnalysis = {
+          trend: res.data.translated,
+          strengths: "",
+          weaknesses: "",
+          recommendations: "",
+        };
+      }
+
+      setAnalyticsData((prev) => ({
+        ...prev,
+        analysis: translatedAnalysis,
+      }));
+    } else {
+      setReport(res.data.translated);
+    }
+  } catch (error) {
+    console.error("Translation Error:", error);
+  } finally {
+    setIsTranslating(false);
+  }
+};
+  // =======================
+  // SAFE DATA HANDLING
+  // =======================
+  const analysis = analyticsData?.analysis || {};
+
+  const chartData = Array.isArray(analyticsData?.chartData)
+    ? analyticsData.chartData.map((item) => ({
+        subject: item.subject ?? item.test ?? item.student ?? "Unknown",
+        score: Number(item.score) || 0,
+      }))
+    : [];
 
   return (
     <div className="ai-modal-overlay">
       <div className="ai-modal">
 
+        {/* HEADER */}
         <div className="ai-modal-header">
           <h2>🤖 AI Tools</h2>
-
-          <button
-            className="close-btn"
-            onClick={onClose}
-          >
+          <button className="close-btn" onClick={onClose}>
             ✖
           </button>
         </div>
 
         <div className="ai-modal-body">
 
+          {/* LEFT PANEL */}
           <div className="ai-left">
 
             <button
-              className={`ai-card ${
-                selectedReport === "assignment" ? "active" : ""
-              }`}
-              onClick={() => setSelectedReport("assignment")}
+              className={`ai-card ${selectedReport === "assignment" ? "active" : ""}`}
+           onClick={() => {
+  setSelectedReport("assignment");
+  setAnalyticsData(null);
+  setReport("");
+  setLanguage("English");
+}}
             >
               📋 Assignment Report
             </button>
 
             <button
-              className={`ai-card ${
-                selectedReport === "teacher" ? "active" : ""
-              }`}
-              onClick={() => setSelectedReport("teacher")}
+              className={`ai-card ${selectedReport === "teacher" ? "active" : ""}`}
+               onClick={() => {
+  setSelectedReport("teacher");
+  setAnalyticsData(null);
+  setReport("");
+  setLanguage("English");
+}}
             >
               👨‍🏫 Teacher Performance
             </button>
 
             <button
-              className={`ai-card ${
-                selectedReport === "analytics" ? "active" : ""
-              }`}
-              onClick={() => setSelectedReport("analytics")}
+              className={`ai-card ${selectedReport === "analytics" ? "active" : ""}`}
+            onClick={() => {
+  setSelectedReport("analytics");
+  setAnalyticsData(null);
+  setReport("");
+  setLanguage("English");
+}}
             >
               📊 Academic Analytics
             </button>
@@ -126,23 +245,145 @@ export default function AIToolsModal({
             >
               {loading ? "Generating..." : "Generate Report"}
             </button>
-
           </div>
 
+
+          {/* RIGHT PANEL */}
           <div className="ai-right">
+    <div className="language-bar">
 
-            <h3>Report Preview</h3>
+  <label>Select Language</label>
 
-            <div className="report-preview">
-              <pre className="report-text">
-                {report || "Select a report and click Generate Report."}
-              </pre>
-            </div>
+  <select
+    className="language-select"
+    value={language}
+    onChange={(e) => {
+      const lang = e.target.value;
+      setLanguage(lang);
+      translateContent(lang);
+    }}
+  >
+    <option value="English">English</option>
+    <option value="Telugu">Telugu</option>
+    <option value="Hindi">Hindi</option>
+    <option value="Tamil">Tamil</option>
+    <option value="Kannada">Kannada</option>
+  </select>
+
+</div>
+<div className="content-panel">
+
+  {/* ================= Assignment ================= */}
+
+  {selectedReport === "assignment" && (
+    <ReportPanel
+      title="Assignment Report"
+      icon="📋"
+      report={report}
+      previewTitle="Assignment Report Preview"
+      previewText="Select Assignment Report and click Generate Report."
+    />
+  )}
+
+  {/* ================= Teacher ================= */}
+
+  {selectedReport === "teacher" && (
+    <ReportPanel
+      title="Teacher Performance"
+      icon="👨‍🏫"
+      report={report}
+      previewTitle="Teacher Performance Preview"
+      previewText="Select Teacher Performance and click Generate Report."
+    />
+  )}
+
+  {/* ================= Academic Analytics ================= */}
+
+  {selectedReport === "analytics" && (
+    <>
+      {!analyticsData && (
+        <AcademicAnalytics
+          selectedClass={selectedClass}
+          setSelectedClass={setSelectedClass}
+          student={student}
+          setStudent={setStudent}
+          subject={subject}
+          setSubject={setSubject}
+        />
+      )}
+
+      {analyticsData && (
+        <>
+          <h3 className="analytics-title">
+            📊 Academic Analytics
+          </h3>
+
+          <h4 className="chart-title">
+            AI Analysis
+          </h4>
+
+          <div className="analysis-container">
+
+            <h4>Trend</h4>
+            <p>{analysis.trend}</p>
+
+            <h4>Strengths</h4>
+            <p>{analysis.strengths}</p>
+
+            <h4>Weaknesses</h4>
+            <p>{analysis.weaknesses}</p>
+
+            <h4>Recommendations</h4>
+            <p>{analysis.recommendations}</p>
 
           </div>
 
-        </div>
+          <h4 className="chart-title">
+            📊 Performance Overview
+          </h4>
 
+          <div className="chart-container">
+
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={chartData}>
+
+                <CartesianGrid strokeDasharray="4 4" />
+
+                <XAxis dataKey="subject" />
+
+                <YAxis domain={[0,100]} />
+
+                <Tooltip />
+
+                <Bar dataKey="score">
+
+                  <LabelList
+                    dataKey="score"
+                    position="top"
+                  />
+
+                  {chartData.map((_, index) => (
+                    <Cell
+                      key={index}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+
+                </Bar>
+
+              </BarChart>
+            </ResponsiveContainer>
+
+          </div>
+        </>
+      )}
+    </>
+  )}
+
+</div>
+
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ const api = axios.create({
 
 // ================= MAIN PAGE =================
 export default function HomePage() {
-  const isCheckingAuth = useAuthGuard();
+  useAuthGuard();
   const fetched = useRef(false);
   
 
@@ -49,10 +49,9 @@ export default function HomePage() {
 
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchText, setSearchText] = useState("");
-  const translationCache = useRef(new Map());
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState("English".trim());
   const [openAI, setOpenAI] = useState(false);
-
+  const [activeSection, setActiveSection] = useState("");
   const [loaded, setLoaded] = useState({
     students: false,
     teachers: false,
@@ -186,73 +185,129 @@ export default function HomePage() {
 
   // ================= TRANSLATE FUNCTION =================
 
-const translateText = async (text, lang) => {
-  if (!text) return text;
+const handleSectionChange = (section) => {
+  setActiveSection(section);
+};  
+const bulkTranslate = async (items, field, lang) => {
 
-  const key = `${text}_${lang}`;
-
-  if (translationCache.current.has(key)) {
-    return translationCache.current.get(key);
+  if (!items || items.length === 0) {
+    return items;
   }
-
-  let translated = text;
 
   try {
-    const userInfo = headmaster
-      ? {
-          name: headmaster.name,
-          email: headmaster.email,
-          role: "Headmaster",
+
+    const texts = items
+      .map(item => item[field])
+      .filter(Boolean);
+
+
+    const response = await api.post(
+      "/headmaster/translate",
+      {
+        text: texts,
+        target_language: lang,
+        user_info: {
+          name: headmaster?.name || "Headmaster",
+          email: headmaster?.email || "",
+          role: "Headmaster"
         }
-      : {
-          name: "unknown",
-          email: "unknown",
-          role: "Headmaster",
+      }
+    );
+
+
+    const translated = response.data?.translated || [];
+
+
+    let index = 0;
+
+
+    return items.map(item => {
+
+      if(item[field]){
+
+        return {
+          ...item,
+          [field]: translated[index++]
         };
 
-    const response = await api.post("/headmaster/translate", {
-      text,
-      target_language: lang,
-      user_info: userInfo,
+      }
+
+      return item;
+
     });
-    console.log("API Response:", response.data);
 
-    translated = response.data?.translation || text;
 
-  } catch (err) {
-    console.error("Translate API failed:", err?.response?.data || err.message);
-    translated = text;
+  } catch(error){
+
+    console.error(
+      "Bulk translation error",
+      error
+    );
+
+    return items;
+
   }
 
-  translationCache.current.set(key, translated);
-
-  return translated;
 };
+
 useEffect(() => {
-  const runTranslation = async () => {
+
+  const translateStudents = async () => {
+
     if (language === "English") {
       setStudents(originalStudents);
       return;
     }
 
-    console.log("Starting translation...");
+    if (!activeSection || originalStudents.length === 0) {
+      return;
+    }
 
-    if (originalStudents.length === 0) return;
-
-    const firstStudent = originalStudents[0];
-
-    console.log("Original Name:", firstStudent.full_name);
-
-    const translatedName = await translateText(
-      firstStudent.full_name,
-      language
+    // Translate only selected section
+    const sectionStudents = originalStudents.filter(
+      (student) =>
+        `${student.class_name} - Section ${student.section_name}` === activeSection
     );
 
-    console.log("Translated Name:", translatedName);
+    try {
+
+      let translatedSection = await bulkTranslate(
+        sectionStudents,
+        "full_name",
+        language
+      );
+
+      translatedSection = await bulkTranslate(
+        translatedSection,
+        "parent_name",
+        language
+      );
+
+      // Merge translated section back into full student list
+      const updatedStudents = originalStudents.map((student) => {
+
+        const translated = translatedSection.find(
+          (s) => s.student_id === student.student_id
+        );
+
+        return translated || student;
+
+      });
+
+      setStudents(updatedStudents);
+
+    } catch (error) {
+
+      console.error(error);
+      setStudents(originalStudents);
+
+    }
+
   };
 
-  runTranslation();
-}, [language]);
+  translateStudents();
+
+}, [language, activeSection, originalStudents]);
   // ================= UI =================
   return (
     <div className="layout">
@@ -267,7 +322,6 @@ useEffect(() => {
           setSearchText={setSearchText}
           notificationCount={unreadCount}
           language={language}
-          translateText={translateText}
           setLanguage={setLanguage}
           onOpenAI={() => setOpenAI(true)}
 
@@ -293,14 +347,14 @@ useEffect(() => {
           />
         )}
 
-        {activeTab === "students" && (
-          <StudentsSection
-            students={students}
-            searchText={searchText}
-            loaded={loaded.students}
-
-          />
-        )}
+    {activeTab === "students" && (
+  <StudentsSection
+    students={students}
+    searchText={searchText}
+    loaded={loaded.students}
+    onSectionChange={handleSectionChange}
+  />
+)}
 
         {activeTab === "teachers" && (
           <TeachersSection
