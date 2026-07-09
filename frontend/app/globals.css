@@ -245,7 +245,7 @@ body {
 .profile-box {
   background: #ffffff;
   border-radius: 18px;
-  padding: 12px 18px;
+  padding: 22px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -775,11 +775,11 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
 }
 
 .search-box {
-  width: 100%;
+  width: 70px;
   max-width: 100%;
   min-height: 72px;
   border-radius: 18px;
-  padding: 0 14px;
+  padding: 0 6px;
 }
 
 .search-input {
@@ -1103,3 +1103,4 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
     transform:translateY(0) scale(1);
   }
 }
+

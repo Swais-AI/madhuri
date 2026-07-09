@@ -10,6 +10,7 @@ import {
   Languages,
   Check,
   ChevronDown,
+    Bot,
 } from "lucide-react";
 import useVoice from "../hooks/useVoice";
 
@@ -18,16 +19,24 @@ export default function Topbar({
   searchText,
   setSearchText,
   notificationCount = 0,
+  language,
+  setLanguage,
+   onOpenAI,
+
+  
 }) {
   const { startVoice, listening } = useVoice();
 
   // Language Dropdown
-  const [language, setLanguage] = useState("English");
+ 
   const [showLangMenu, setShowLangMenu] = useState(false);
 
   const langRef = useRef(null);
-
-  const languages = ["English", "తెలుగు", "हिन्दी"];
+const languages = [
+  { label: "English", value: "English" },
+  { label: "తెలుగు", value: "Telugu" },
+  { label: "हिन्दी", value: "Hindi" },
+];
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -55,25 +64,40 @@ export default function Topbar({
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleVoiceInput = () => {
-    startVoice((text) => {
-      if (!text) return;
+const handleVoiceInput = () => {
+  startVoice((text) => {
+    if (!text) return;
 
-      setSearchText("");
+    setSearchText("");
 
-      let i = 0;
+    let i = 0;
 
-      const interval = setInterval(() => {
-        setSearchText(text.slice(0, i));
-        i++;
+    const interval = setInterval(() => {
+      setSearchText(text.slice(0, i));
+      i++;
 
-        if (i > text.length) clearInterval(interval);
-      }, 12);
-    });
-  };
+      if (i > text.length) clearInterval(interval);
+    }, 12);
+  });
+};
 
   return (
+    
     <div className="topbar">
+        {/* Profile */}
+        <div className="profile-card">
+          <Shield size={22} />
+
+          <div>
+            <h3>
+              Welcome {headmaster?.name || "Headmaster"}
+            </h3>
+
+            <p>
+              {headmaster?.role || "Admin Access"}
+            </p>
+          </div>
+        </div>
       {/* LEFT */}
       <div className="topbar-left">
         <div className="search-box">
@@ -113,6 +137,14 @@ export default function Topbar({
 
       {/* RIGHT */}
       <div className="topbar-right">
+      <button
+  className="ai-btn"
+  onClick={onOpenAI}
+  type="button"
+>
+  <Bot size={18} />
+  <span>AI Tools</span>
+</button>
 
         {/* Language */}
         <div className="language-wrapper" ref={langRef}>
@@ -123,7 +155,9 @@ export default function Topbar({
           >
             <Languages size={18} />
 
-            <span>{language}</span>
+           <span>
+  {languages.find((lang) => lang.value === language)?.label || language}
+</span>
 
             <ChevronDown
               size={16}
@@ -131,27 +165,27 @@ export default function Topbar({
             />
           </button>
 
-          {showLangMenu && (
-            <div className="language-dropdown">
-              {languages.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  className={`language-item ${
-                    language === lang ? "selected" : ""
-                  }`}
-                  onClick={() => {
-                    setLanguage(lang);
-                    setShowLangMenu(false);
-                  }}
-                >
-                  <span>{lang}</span>
+    {showLangMenu && (
+  <div className="language-dropdown">
+    {languages.map((lang) => (
+      <button
+        key={lang.value}
+        type="button"
+        className={`language-item ${
+          language === lang.value ? "selected" : ""
+        }`}
+        onClick={() => {
+        setLanguage(lang.value.trim());
+          setShowLangMenu(false);
+        }}
+      >
+        <span>{lang.label}</span>
 
-                  {language === lang && <Check size={16} />}
-                </button>
-              ))}
-            </div>
-          )}
+        {language === lang.value && <Check size={16} />}
+      </button>
+    ))}
+  </div>
+)}
         </div>
 
         {/* Notification */}
@@ -165,20 +199,7 @@ export default function Topbar({
           )}
         </div>
 
-        {/* Profile */}
-        <div className="profile-card">
-          <Shield size={22} />
-
-          <div>
-            <h3>
-              Welcome {headmaster?.name || "Headmaster"}
-            </h3>
-
-            <p>
-              {headmaster?.role || "Admin Access"}
-            </p>
-          </div>
-        </div>
+       
 
       </div>
     </div>

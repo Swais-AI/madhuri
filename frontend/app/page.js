@@ -7,6 +7,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 
+import AIToolsModal from "../components/AIToolsModal";
 import DashboardSection from "../components/DashboardSection";
 import StudentsSection from "../components/StudentsSection";
 import TeachersSection from "../components/TeachersSection";
@@ -26,15 +27,17 @@ const api = axios.create({
 export default function HomePage() {
   useAuthGuard();
   const fetched = useRef(false);
+  
 
   const [activeTab, setActiveTab] = useState("dashboard");
-
   const [loading, setLoading] = useState(false);
 
   const [students, setStudents] = useState([]);
+  const [originalStudents, setOriginalStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [progressData, setProgressData] = useState([]);
   const [notifications, setNotifications] = useState([]);
+
   const [classTeachers, setClassTeachers] = useState([]);
   const [functionsData, setFunctionsData] = useState([]);
   const [toursData, setToursData] = useState([]);
@@ -46,7 +49,9 @@ export default function HomePage() {
 
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchText, setSearchText] = useState("");
-
+  const [language, setLanguage] = useState("English".trim());
+  const [openAI, setOpenAI] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const [loaded, setLoaded] = useState({
     students: false,
     teachers: false,
@@ -57,6 +62,7 @@ export default function HomePage() {
     classTeachers: false,
   });
 
+
   // ================= DASHBOARD LOAD =================
   useEffect(() => {
     if (fetched.current) return;
@@ -66,7 +72,6 @@ export default function HomePage() {
       try {
         setLoading(true);
 
-        // ✅ FIXED: dashboard-core → dashboard
         const res = await api.get("/dashboard/");
         const data = res.data;
 
@@ -85,7 +90,6 @@ export default function HomePage() {
 
     loadDashboard();
   }, []);
-
   // ================= TAB HANDLER =================
   const handleTabChange = async (tab) => {
     setActiveTab(tab);
@@ -94,11 +98,16 @@ export default function HomePage() {
       setLoading(true);
 
       // ================= STUDENTS =================
-      if (tab === "students" && !loaded.students) {
-        const res = await api.get("/students/");
-        setStudents(res.data || []);
-        setLoaded((p) => ({ ...p, students: true }));
-      }
+     if (tab === "students" && !loaded.students) {
+  const res = await api.get("/students/");
+
+  const data = res.data || [];
+
+  setOriginalStudents(data);
+  setStudents(data);
+
+  setLoaded((p) => ({ ...p, students: true }));
+}
 
       // ================= TEACHERS =================
       if (tab === "teachers" && !loaded.teachers) {
@@ -115,12 +124,21 @@ export default function HomePage() {
       }
 
       // ================= NOTIFICATIONS =================
-      if (tab === "notifications" && !loaded.notifications) {
-        const res = await api.get("/notifications/");
-        console.log("Notification API:", res.data);
-        setNotifications(res.data || []);
-        setLoaded((p) => ({ ...p, notifications: true }));
-      }
+     if (tab === "notifications" && !loaded.notifications) {
+  // Fetch notifications
+  const res = await api.get("/notifications/");
+  console.log("Notification API:", res.data);
+
+  setNotifications(res.data || []);
+
+  // Mark all notifications as read
+  await api.put("/notifications/mark-read");
+
+  // Remove the badge immediately
+  setUnreadCount(0);
+
+  setLoaded((p) => ({ ...p, notifications: true }));
+}
 
       // ================= FUNCTIONS =================
       if (tab === "functions" && !loaded.functions) {
@@ -165,6 +183,131 @@ export default function HomePage() {
     );
   };
 
+  // ================= TRANSLATE FUNCTION =================
+
+const handleSectionChange = (section) => {
+  setActiveSection(section);
+};  
+const bulkTranslate = async (items, field, lang) => {
+
+  if (!items || items.length === 0) {
+    return items;
+  }
+
+  try {
+
+    const texts = items
+      .map(item => item[field])
+      .filter(Boolean);
+
+
+    const response = await api.post(
+      "/headmaster/translate",
+      {
+        text: texts,
+        target_language: lang,
+        user_info: {
+          name: headmaster?.name || "Headmaster",
+          email: headmaster?.email || "",
+          role: "Headmaster"
+        }
+      }
+    );
+
+
+    const translated = response.data?.translated || [];
+
+
+    let index = 0;
+
+
+    return items.map(item => {
+
+      if(item[field]){
+
+        return {
+          ...item,
+          [field]: translated[index++]
+        };
+
+      }
+
+      return item;
+
+    });
+
+
+  } catch(error){
+
+    console.error(
+      "Bulk translation error",
+      error
+    );
+
+    return items;
+
+  }
+
+};
+
+useEffect(() => {
+
+  const translateStudents = async () => {
+
+    if (language === "English") {
+      setStudents(originalStudents);
+      return;
+    }
+
+    if (!activeSection || originalStudents.length === 0) {
+      return;
+    }
+
+    // Translate only selected section
+    const sectionStudents = originalStudents.filter(
+      (student) =>
+        `${student.class_name} - Section ${student.section_name}` === activeSection
+    );
+
+    try {
+
+      let translatedSection = await bulkTranslate(
+        sectionStudents,
+        "full_name",
+        language
+      );
+
+      translatedSection = await bulkTranslate(
+        translatedSection,
+        "parent_name",
+        language
+      );
+
+      // Merge translated section back into full student list
+      const updatedStudents = originalStudents.map((student) => {
+
+        const translated = translatedSection.find(
+          (s) => s.student_id === student.student_id
+        );
+
+        return translated || student;
+
+      });
+
+      setStudents(updatedStudents);
+
+    } catch (error) {
+
+      console.error(error);
+      setStudents(originalStudents);
+
+    }
+
+  };
+
+  translateStudents();
+
+}, [language, activeSection, originalStudents]);
   // ================= UI =================
   return (
     <div className="layout">
@@ -178,7 +321,16 @@ export default function HomePage() {
           searchText={searchText}
           setSearchText={setSearchText}
           notificationCount={unreadCount}
+          language={language}
+          setLanguage={setLanguage}
+          onOpenAI={() => setOpenAI(true)}
+
         />
+       <AIToolsModal
+  open={openAI}
+  onClose={() => setOpenAI(false)}
+/>
+
 
         {/* Optional loading indicator */}
         {loading && (
@@ -195,14 +347,14 @@ export default function HomePage() {
           />
         )}
 
-        {activeTab === "students" && (
-          <StudentsSection
-            students={students}
-            searchText={searchText}
-            loaded={loaded.students}
-
-          />
-        )}
+    {activeTab === "students" && (
+  <StudentsSection
+    students={students}
+    searchText={searchText}
+    loaded={loaded.students}
+    onSectionChange={handleSectionChange}
+  />
+)}
 
         {activeTab === "teachers" && (
           <TeachersSection

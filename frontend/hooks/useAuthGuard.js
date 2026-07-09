@@ -8,9 +8,10 @@ export default function useAuthGuard() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const ssoRole = sessionStorage.getItem("userRole");
 
-    if (!token) {
-      window.location.href = "https://staging.sgs.swais.in";
-    }
+   // if (!token && ssoRole !== "Headmaster") {
+    //  window.location.href = "https://staging.sgs.swais.in";
+    //}
   }, []);
 }
