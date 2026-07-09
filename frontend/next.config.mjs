@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  allowedDevOrigins: ["16.112.236.67"],
+  basePath: '/headmaster',
 };
 
 export default nextConfig;
