@@ -61,20 +61,20 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       <div className="sidebar">
         <div>
           {/* BRAND */}
-          <div className="brand-box">
-            <div className="logo-circle">
-              <Image
-                src="/school-logo.jpeg"
-                alt="SGS Logo"
-                width={80}
-                height={80}
-                className="school-logo"
-              />
-            </div>
+        <div className="brand-box">
+  <div className="logo-circle">
+    <img
+      src="/headmaster/school-logo.jpeg"
+      alt="SGS Logo"
+      width={80}
+      height={80}
+      className="school-logo"
+    />
+  </div>
 
-            <h2>SGS SCHOOL</h2>
-            <p>Headmaster Dashboard</p>
-          </div>
+  <h2>SGS SCHOOL</h2>
+  <p>Headmaster Dashboard</p>
+</div>
 
           {/* MENU */}
           <div className="menu-list">
