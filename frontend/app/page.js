@@ -16,11 +16,11 @@ import NotificationsSection from "../components/NotificationsSection";
 import FunctionsSection from "../components/FunctionsSection";
 import ToursSection from "../components/ToursSection";
 import ClassTeachersSection from "../components/ClassTeachersSection";
-
+import { translateActiveTab } from "./utils/translateActiveTab";
 // ================= API SETUP =================
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  timeout: 10000, // production safety
+  timeout: 30000, // production safety
 });
 
 // ================= MAIN PAGE =================
@@ -34,13 +34,23 @@ export default function HomePage() {
 
   const [students, setStudents] = useState([]);
   const [originalStudents, setOriginalStudents] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [progressData, setProgressData] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+ const [teachers, setTeachers] = useState([]);
+const [originalTeachers, setOriginalTeachers] = useState([]);
 
-  const [classTeachers, setClassTeachers] = useState([]);
-  const [functionsData, setFunctionsData] = useState([]);
-  const [toursData, setToursData] = useState([]);
+const [progressData, setProgressData] = useState([]);
+const [originalProgressData, setOriginalProgressData] = useState([]);
+
+const [notifications, setNotifications] = useState([]);
+const [originalNotifications, setOriginalNotifications] = useState([]);
+
+const [classTeachers, setClassTeachers] = useState([]);
+const [originalClassTeachers, setOriginalClassTeachers] = useState([]);
+
+const [functionsData, setFunctionsData] = useState([]);
+const [originalFunctionsData, setOriginalFunctionsData] = useState([]);
+
+const [toursData, setToursData] = useState([]);
+const [originalToursData, setOriginalToursData] = useState([]);
 
   const [dashboardSummary, setDashboardSummary] = useState({});
   const [performanceData, setPerformanceData] = useState([]);
@@ -92,9 +102,31 @@ export default function HomePage() {
   }, []);
   // ================= TAB HANDLER =================
   const handleTabChange = async (tab) => {
-    setActiveTab(tab);
 
-    try {
+  // Restore the current tab to English before leaving it
+  if (activeTab === "students") {
+    setStudents(originalStudents);
+  } else if (activeTab === "teachers") {
+    setTeachers(originalTeachers);
+  } else if (activeTab === "progress") {
+    setProgressData(originalProgressData);
+  } else if (activeTab === "notifications") {
+    setNotifications(originalNotifications);
+  } else if (activeTab === "functions") {
+    setFunctionsData(originalFunctionsData);
+  } else if (activeTab === "tours") {
+    setToursData(originalToursData);
+  } else if (activeTab === "classTeachers") {
+    setClassTeachers(originalClassTeachers);
+  }
+
+  // Reset the language button
+  setLanguage("English");
+
+  // Switch to the new tab
+  setActiveTab(tab);
+
+  try {
       setLoading(true);
 
       // ================= STUDENTS =================
@@ -110,16 +142,26 @@ export default function HomePage() {
 }
 
       // ================= TEACHERS =================
-      if (tab === "teachers" && !loaded.teachers) {
-        const res = await api.get("/teachers/");
-        setTeachers(res.data || []);
-        setLoaded((p) => ({ ...p, teachers: true }));
-      }
+     if (tab === "teachers" && !loaded.teachers) {
+
+  const res = await api.get("/teachers/");
+
+  const data = res.data || [];
+
+  setOriginalTeachers(data);
+  setTeachers(data);
+
+  setLoaded((p) => ({ ...p, teachers: true }));
+}
 
       // ================= PROGRESS =================
       if (tab === "progress" && !loaded.progress) {
-        const res = await api.get("/students/progress"); // FIXED
-        setProgressData(res.data || []);
+        const res = await api.get("/students/progress");
+
+const data = res.data || [];
+
+setOriginalProgressData(data);
+setProgressData(data);
         setLoaded((p) => ({ ...p, progress: true }));
       }
 
@@ -128,8 +170,11 @@ export default function HomePage() {
   // Fetch notifications
   const res = await api.get("/notifications/");
   console.log("Notification API:", res.data);
+const data = res.data || [];
 
-  setNotifications(res.data || []);
+setOriginalNotifications(data);
+setNotifications(data);
+  
 
   // Mark all notifications as read
   await api.put("/notifications/mark-read");
@@ -143,21 +188,30 @@ export default function HomePage() {
       // ================= FUNCTIONS =================
       if (tab === "functions" && !loaded.functions) {
         const res = await api.get("/functions/");
-        setFunctionsData(res.data || []);
+    const data = res.data || [];
+
+setOriginalFunctionsData(data);
+setFunctionsData(data);
         setLoaded((p) => ({ ...p, functions: true }));
       }
 
       // ================= TOURS =================
       if (tab === "tours" && !loaded.tours) {
         const res = await api.get("/tours/");
-        setToursData(res.data || []);
+       const data = res.data || [];
+
+setOriginalToursData(data);
+setToursData(data);
         setLoaded((p) => ({ ...p, tours: true }));
       }
 
       // ================= CLASS TEACHERS =================
       if (tab === "classTeachers" && !loaded.classTeachers) {
         const res = await api.get("/class-teachers/");
-        setClassTeachers(res.data || []);
+       const data = res.data || [];
+
+setOriginalClassTeachers(data);
+setClassTeachers(data);
         setLoaded((p) => ({ ...p, classTeachers: true }));
       }
 
@@ -199,6 +253,9 @@ const bulkTranslate = async (items, field, lang) => {
     const texts = items
       .map(item => item[field])
       .filter(Boolean);
+
+      console.log("Field:", field);
+console.log("Texts count:", texts.length);
 
 
     const response = await api.post(
@@ -268,6 +325,8 @@ useEffect(() => {
       (student) =>
         `${student.class_name} - Section ${student.section_name}` === activeSection
     );
+    console.log("Active Section:", activeSection);
+console.log("Students in section:", sectionStudents.length);
 
     try {
 
@@ -308,6 +367,46 @@ useEffect(() => {
   translateStudents();
 
 }, [language, activeSection, originalStudents]);
+
+ // ================= TRANSLATION FOR OTHER TABS=================
+useEffect(() => {
+
+  translateActiveTab({
+
+    activeTab,
+    language,
+    bulkTranslate,
+
+    originalTeachers,
+    setTeachers,
+
+    originalProgressData,
+    setProgressData,
+
+    originalNotifications,
+    setNotifications,
+
+    originalFunctionsData,
+    setFunctionsData,
+
+    originalToursData,
+    setToursData,
+
+    originalClassTeachers,
+    setClassTeachers,
+
+  });
+
+}, [
+  language,
+  activeTab,
+  originalTeachers,
+  originalProgressData,
+  originalNotifications,
+  originalFunctionsData,
+  originalToursData,
+  originalClassTeachers,
+]);
   // ================= UI =================
   return (
     <div className="layout">

@@ -347,7 +347,7 @@ textToTranslate = JSON.stringify(analyticsData.analysis);
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={chartData}>
 
-                <CartesianGrid strokeDasharray="4 4" />
+               
 
                 <XAxis dataKey="subject" />
 

@@ -82,6 +82,7 @@ def generate_content(prompt: str, max_retries: int = 5):
                 model=GEMINI_MODEL,
                 contents=prompt
             )
+              
 
             text = getattr(response, "text", "") or ""
 

@@ -13,7 +13,7 @@ import {
     Bot,
 } from "lucide-react";
 import useVoice from "../hooks/useVoice";
-
+import Image from "next/image";
 export default function Topbar({
   headmaster,
   searchText,
@@ -120,7 +120,10 @@ const handleVoiceInput = () => {
               title="Speak text"
               type="button"
             >
-              <Volume2 size={16} />
+             <Volume2
+  size={16}
+  stroke="#cbd5e1"
+/>
             </button>
 
             <button
@@ -198,7 +201,23 @@ const handleVoiceInput = () => {
             </span>
           )}
         </div>
+      {/* SWAIS Brand */}
+{/* SWAIS Brand */}
+<div className="brand">
+  <div className="brand-logo">
+    <img
+      src="/headmaster/swais-logo.jpeg"
+      alt="SWAIS Logo"
+      width="50"
+      height="50"
+    />
+  </div>
 
+  <div className="brand-text">
+    <span>SWAIS</span>
+    <span>SARASWATI</span>
+  </div>
+</div>
        
 
       </div>

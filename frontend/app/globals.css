@@ -17,10 +17,14 @@
 }
 
 body {
-  background: #f4f7fb;
-  color: #1e293b;
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e1b4b 50%,
+    #0f172a 100%
+  );
+  color: #ffffff;
 }
-
 
 /* =========================================================
    2. MAIN LAYOUT
@@ -45,7 +49,12 @@ body {
 
 .sidebar {
   width: 270px;
-  background: linear-gradient(to bottom, #041c5c, #052d8d);
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e1b4b 50%,
+    #0f172a 100%
+  );
   color: white;
   padding: 22px 18px;
   display: flex;
@@ -126,17 +135,7 @@ body {
   background: #2563eb;
 }
 
-.logout-btn {
-  border: none;
-  background: transparent;
-  color: #ff4d4f;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  cursor: pointer;
-  font-size: 16px;
-}
+
 
 /* =========================================================
    5. TOPBAR, SEARCH, PROFILE & NOTIFICATION
@@ -147,52 +146,60 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
   gap: 20px;
-  flex-wrap: wrap;
-}
 
+  margin-bottom: 24px;
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+}
 .topbar-left {
   flex: 1;
-  min-width: 320px;
-}
-
-.search-box {
-  background: #ffffff;
-  border: 1px solid #e7ebf3;
-  padding: 0 18px;
-  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+}
+.search-box {
   width: 100%;
-  max-width: 630px;
-  min-height: 84px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+
+  padding: 0 18px;
 }
 
+
+.search-mic {
+  color: #c084fc;
+  cursor: pointer;
+  font-size: 22px;
+}
 .search-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
+    color: #cbd5e1;
   flex-shrink: 0;
 }
 
 .search-input {
+  width: 100%;
   border: none;
   outline: none;
-  width: 100%;
   background: transparent;
-  font-size: 16px;
-  color: #0f172a;
-  font-weight: 500;
-}
 
+  color: #ffffff;
+  font-size: 16px;
+}
 .search-input::placeholder {
-  color: #111827;
-  opacity: 1;
-  font-weight: 500;
+  color: #94a3b8;
 }
 
 .search-actions {
@@ -210,18 +217,17 @@ body {
 }
 
 .notification-bell {
-  position: relative;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 18px;
-  background: #ffffff;
+
   display: flex;
-  align-items: center;
   justify-content: center;
-  color: #0f172a;
-  cursor: pointer;
-  border: 1px solid #edf1f7;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  align-items: center;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
 }
 
 .notification-badge {
@@ -243,29 +249,29 @@ body {
 
 .profile-card,
 .profile-box {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 22px 18px;
+  height: 68px;
+  min-width: 300px;
+  padding: 0 22px;
+
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 68px;
-  border: 1px solid #edf1f7;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  gap: 14px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
 }
 
 .profile-card h3,
 .profile-box h4 {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 1.2;
 }
 
 .profile-card p,
 .profile-box p {
-  color: #64748b;
-  font-size: 14px;
-  margin-top: 2px;
+  font-size: 15px;
+  color: #cbd5e1;
 }
 /* =========================================================
    6. DASHBOARD KPI CARDS
@@ -332,10 +338,12 @@ body {
 
 .card,
 .page-card {
-  background: white;
+  background: rgba(30, 27, 75, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
   padding: 24px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
   overflow-x: hidden;
 }
 
@@ -355,7 +363,6 @@ body {
   font-size: 32px;
 }
 
-
 /* =========================================================
    9. TABLE STYLES
    ========================================================= */
@@ -367,34 +374,32 @@ table {
 }
 
 thead {
-  background: #f8fafc;
+  background: rgba(255,255,255,0.05);
 }
 
-th {
+thead th {
   text-align: left;
-  padding: 14px;
-  font-size: 13px;
-  color: #64748b;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;                       /* White headings */
+  border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
-td {
-  padding: 14px;
-  border-top: 1px solid #e2e8f0;
-  font-size: 14px;
+tbody td {
+  padding: 16px;
+  font-size: 15px;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: rgba(255,255,255,0.04);
 }
 
-.clickable-row {
-  cursor: pointer;
+tbody tr:last-child td {
+  border-bottom: none;
 }
-
-.clickable-row:hover {
-  background: #eff6ff;
-}
-
 
 /* =========================================================
    10. STATUS BADGES
@@ -519,10 +524,9 @@ tbody tr:hover {
 /* =========================================================
    13. PROGRESS SCREEN - COMMON
    ========================================================= */
-
 .progress-subtitle {
   margin: 18px 0;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .progress-breadcrumb {
@@ -530,19 +534,17 @@ tbody tr:hover {
   align-items: center;
   gap: 8px;
   margin-bottom: 22px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 600;
 }
 
 .progress-breadcrumb button {
   border: none;
   background: transparent;
-  color: #2563eb;
+  color: #60a5fa;
   cursor: pointer;
   font-weight: 700;
 }
-
-
 /* =========================================================
    14. PROGRESS SCREEN - CLASS CARDS
    ========================================================= */
@@ -555,31 +557,36 @@ tbody tr:hover {
 
 .progress-class-card {
   padding: 28px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e1b4b 50%,
+    #0f172a 100%
+  );
   border-radius: 20px;
   font-size: 20px;
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  transition: all 0.25s ease;
 }
 
 .progress-class-card:hover {
-  color: #2563eb;
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    #1e293b 0%,
+    #312e81 50%,
+    #1e293b 100%
+  );
   transform: translateY(-2px);
 }
 
-.progress-class-name {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-
+.progress-class-name,
 .progress-class-count {
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
+  color: #ffffff;
 }
 
 .progress-class-card.active-progress-class-card {
@@ -662,7 +669,6 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
 /* =========================================================
    16. PROGRESS SCREEN - SUMMARY & TABLE
    ========================================================= */
-
 .progress-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -671,33 +677,55 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
 }
 
 .progress-summary-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: none;
   border-radius: 16px;
   padding: 18px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+}
+
+/* Student */
+.progress-summary-card:nth-child(1) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+/* Overall Performance */
+.progress-summary-card:nth-child(2) {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Best Subject */
+.progress-summary-card:nth-child(3) {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+/* Exams Taken */
+.progress-summary-card:nth-child(4) {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
 .progress-summary-card span {
   display: block;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
   margin-bottom: 8px;
 }
 
 .progress-summary-card strong {
   font-size: 18px;
-  color: #0f172a;
+  color: #ffffff;
 }
 
-.progress-table-scroll {
-  width: 100%;
-  overflow-x: auto;
+.progress-summary-card span {
+  display: block;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  margin-bottom: 8px;
 }
 
-.progress-table-scroll table {
-  width: 100%;
-  min-width: 700px;
+.progress-summary-card strong {
+  font-size: 18px;
+  color: #ffffff;
 }
 
 
@@ -906,75 +934,61 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
    ========================================================= */
 
 .speak-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  color: #64748b;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  color: #cbd5e1;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-  transition: all 0.25s ease;
-  flex-shrink: 0;
+  transition: all .25s ease;
 }
 
-.speak-btn:hover {
-  transform: translateY(-1px) scale(1.03);
-  background: #f8fafc;
-  color: #0f172a;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+.speak-btn:hover{
+  background: rgba(255,255,255,0.14);
+  color:#fff;
 }
 
 .speak-btn:active {
   transform: scale(0.97);
 }
-
 .mic-btn {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 14px;
-  border: none;
-  background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
-  color: #ffffff;
-  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  color: #cbd5e1;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.28);
-  transition: all 0.25s ease;
+
+  cursor: pointer;
+  transition: all .25s ease;
   flex-shrink: 0;
 }
 
 .mic-btn:hover {
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 10px 22px rgba(29, 78, 216, 0.35);
+  background: rgba(255,255,255,0.14);
+  color: #fff;
 }
 
 .mic-btn:active {
   transform: scale(0.97);
 }
 
+/* Listening state only */
 .mic-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  box-shadow: 0 0 0 6px rgba(37,99,235,.18);
   animation: pulseMic 1s infinite;
-  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.12);
-}
-
-@keyframes pulseMic {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35);
-  }
-  70% {
-    transform: scale(1.06);
-    box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
 }
 /* ===========================
    Language Button
@@ -1104,3 +1118,38 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
   }
 }
 
+
+/* ===========================
+  swais
+=========================== */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-text span:first-child {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.brand-text span:last-child {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}

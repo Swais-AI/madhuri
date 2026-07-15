@@ -3,8 +3,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
-  background: #2563eb;
+ background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
 
   border: none;
@@ -23,7 +22,7 @@
 }
 
 .ai-btn:hover {
-  background: #1d4ed8;
+   background: linear-gradient(135deg, #1d4ed8, #1e40af);
   transform: translateY(-1px);
 }
 .ai-modal-overlay {
@@ -43,7 +42,13 @@
   width: 900px;
   max-width: 95%;
   height: 90vh;          /* REQUIRED */
-  background: #fff;
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e1b4b 50%,
+    #0f172a 100%
+);
+  color: #ffffff;
   border-radius: 16px;
   padding: 24px;
 
@@ -65,16 +70,16 @@
 .ai-modal-header h2 {
   margin: 0;
   font-size: 28px;
-  color: #1f2937;
+   color: #ffffff;
 }
 
 .close-btn {
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 22px;
+    cursor: pointer;
 }
-
 /* Body */
 .ai-modal-body {
   display: flex;
@@ -96,8 +101,9 @@
 /* Report Buttons */
 
 .ai-card {
-  background: white;
-  border: 1px solid #dcdcdc;
+ background: #2b295c;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #ffffff;
   border-radius: 10px;
 
   padding: 15px;
@@ -114,7 +120,7 @@
 }
 
 .ai-card:hover {
-  background: #f4f8ff;
+   background: #2563eb;
   border-color: #2563eb;
 }
 
@@ -129,7 +135,7 @@
 
   border-radius: 10px;
 
-  background: #2563eb;
+ background: linear-gradient(135deg, #2563eb, #1d4ed8);
 
   color: white;
 
@@ -141,7 +147,7 @@
 }
 
 .generate-btn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
 }
 
 /* Right Panel */
@@ -160,8 +166,14 @@
 
 .report-preview{
     width: 100%;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e1b4b 50%,
+        #0f172a 100%
+    );
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #ffffff;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -192,13 +204,6 @@
     line-height:1.8;
 }
 
-.report-text {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  font-family: inherit;
-}
 
 /* Entire right-side report panel */
 .report-panel{
@@ -206,7 +211,7 @@
     display:flex;
     flex-direction:column;
 
-    background:#fff;
+      background: #252357;
     border-radius:16px;
     padding:24px;
 
@@ -218,31 +223,23 @@
     margin:0 0 20px 0;
     font-size:24px;
     font-weight:700;
-    color:#1f2937;
-    border-bottom:1px solid #e5e7eb;
+color: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
     padding-bottom:16px;
 }
 
-/* Empty state */
-.report-empty{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    color:#64748b;
-}
+
 
 /* Report text */
 .report-text{
     margin:0;
     white-space:pre-wrap;
     word-break:break-word;
+    overflow-wrap: anywhere;
     font-family:inherit;
     font-size:15px;
     line-height:1.9;
-    color:#374151;
+     color: rgba(255,255,255,0.9);
 }
 
 .language-bar {
@@ -256,14 +253,15 @@
 .language-bar label {
     font-size: 14px;
     font-weight: 600;
-    color: #334155;
+     color: #ffffff;
 }
 
 .language-select {
     padding: 8px 14px;
     border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: white;
+    background: #2b295c;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.12);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -271,7 +269,7 @@
 }
 
 .language-select:hover {
-    border-color: #2563eb;
+   border-color: #2563eb;
 }
 
 
@@ -280,24 +278,28 @@
 }
 
 .content-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
+       background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e1b4b 50%,
+        #0f172a 100%
+    );
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
     padding: 24px;
     min-height: 520px;
+    color: #ffffff;
 }
 
 .report-empty {
+      flex: 1;
     height: 400px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    border: 2px dashed #d5dbe7;
+     color: rgba(255,255,255,0.7);
+  border: 2px dashed rgba(255,255,255,0.15);
     border-radius: 10px;
 }
 
-.report-text {
-    white-space: pre-wrap;
-    line-height: 1.8;
-}
