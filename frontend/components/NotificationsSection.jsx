@@ -6,7 +6,7 @@ export default function NotificationsSection({
     <div className="page-card">
       <h2>Notifications</h2>
 
-      <div className="table-wrap">
+      <div className="table-scroll-wrapper">
         <table>
           <thead>
             <tr>

@@ -303,3 +303,209 @@ color: #ffffff;
     border-radius: 10px;
 }
 
+/* ===========================
+   AI Tools Modal - Mobile View
+=========================== */
+
+@media (max-width: 900px) {
+  .ai-modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .ai-modal {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: calc(100dvh - 24px);
+    max-height: none;
+
+    margin: 0;
+    padding: 18px;
+
+    border-radius: 18px;
+
+    overflow: visible;
+  }
+
+  .ai-modal-header {
+    margin-bottom: 16px;
+  }
+
+  .ai-modal-header h2 {
+    font-size: 24px;
+  }
+
+  .close-btn {
+    font-size: 20px;
+  }
+
+  .ai-modal-body {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+
+    overflow: visible;
+    min-height: auto;
+  }
+
+  /* Report option buttons */
+  .ai-left {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .ai-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+
+    margin-bottom: 0;
+    padding: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.25;
+
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .generate-btn {
+    width: 100%;
+    min-height: 48px;
+
+    margin-top: 0;
+    padding: 12px;
+
+    grid-column: 1 / -1;
+
+    font-size: 15px;
+  }
+
+  /* Right content */
+  .ai-right {
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: visible;
+  }
+
+  .language-bar {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .language-bar label {
+    font-size: 14px;
+  }
+
+  .language-select {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+  }
+
+  .content-panel {
+    width: 100%;
+    min-width: 0;
+
+    margin-top: 0;
+  }
+
+  .report-panel {
+    width: 100%;
+    min-width: 0;
+
+    padding: 16px;
+
+    overflow: visible;
+  }
+
+  .report-title {
+    font-size: 20px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .report-preview {
+    width: 100%;
+    min-width: 0;
+
+    padding: 16px;
+
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .content-card {
+    width: 100%;
+    min-width: 0;
+    min-height: auto;
+
+    padding: 16px;
+  }
+
+  .report-empty {
+    width: 100%;
+    min-height: 260px;
+    height: auto;
+
+    padding: 20px;
+
+    text-align: center;
+  }
+
+  .analysis-container,
+  .chart-container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chart-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-modal {
+    padding: 14px;
+  }
+
+  .ai-modal-header h2 {
+    font-size: 22px;
+  }
+
+  .ai-left {
+    grid-template-columns: 1fr;
+  }
+
+  .generate-btn {
+    grid-column: auto;
+  }
+
+  .ai-card {
+    min-height: 58px;
+  }
+}

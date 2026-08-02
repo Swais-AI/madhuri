@@ -10,7 +10,8 @@ import {
   Languages,
   Check,
   ChevronDown,
-    Bot,
+  Bot,
+  Menu,
 } from "lucide-react";
 import useVoice from "../hooks/useVoice";
 import Image from "next/image";
@@ -21,10 +22,11 @@ export default function Topbar({
   notificationCount = 0,
   language,
   setLanguage,
-   onOpenAI,
-
-  
+  onOpenAI,
+  sidebarOpen,
+  setSidebarOpen,
 }) {
+
   const { startVoice, listening } = useVoice();
 
   // Language Dropdown
@@ -84,18 +86,24 @@ const handleVoiceInput = () => {
   return (
     
     <div className="topbar">
+      <button
+  className="mobile-menu-btn"
+  onClick={() => setSidebarOpen(!sidebarOpen)}
+  type="button"
+>
+  <Menu size={24} />
+</button>
         {/* Profile */}
         <div className="profile-card">
           <Shield size={22} />
 
           <div>
-            <h3>
-              Welcome {headmaster?.name || "Headmaster"}
-            </h3>
-
-            <p>
-              {headmaster?.role || "Admin Access"}
-            </p>
+<h3>
+  Welcome {headmaster?.name || "Headmaster"}
+</h3>
+<p>
+  {headmaster?.role || "Headmaster Access"}
+</p>
           </div>
         </div>
       {/* LEFT */}
@@ -193,7 +201,7 @@ const handleVoiceInput = () => {
 
         {/* Notification */}
         <div className="notification-bell">
-          <Bell size={22} />
+          <Bell size={18} />
 
           {notificationCount > 0 && (
             <span className="notification-badge">

@@ -777,23 +777,24 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
 }
 
 @media (max-width: 900px) {
-  .layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-.topbar {
+ .topbar {
+  display: flex;
   flex-direction: column;
+  gap: 16px;
   align-items: stretch;
 }
 
+.topbar-left {
+  width: 100%;
+}
+
 .topbar-right {
-  justify-content: flex-end;
+  width: 100%;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+  align-items: center;
 }
 
 .analytics-grid,
@@ -801,13 +802,11 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
 .student-grid {
   grid-template-columns: 1fr;
 }
-
 .search-box {
-  width: 70px;
-  max-width: 100%;
-  min-height: 72px;
+  width: 100%;
+  min-height: 56px;
   border-radius: 18px;
-  padding: 0 6px;
+  padding: 0 12px;
 }
 
 .search-input {
@@ -862,71 +861,83 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
   cursor: pointer;
   font-weight: 600;
 }
-
-/* Logout Modal */
-
+/* Logout Modal Overlay */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+
   z-index: 9999;
 }
 
+/* Logout Modal Box */
 .modal-box {
-  width: 420px;
-  background: #fff;
+  width: 100%;
+  max-width: 420px;
+
+  background: #ffffff;
   border-radius: 18px;
+
   padding: 28px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
 
+/* Title */
 .modal-title {
+  margin-bottom: 12px;
+
   font-size: 30px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 12px;
 }
 
+/* Message */
 .modal-text {
+  margin-bottom: 24px;
+
   font-size: 16px;
   color: #64748b;
-  margin-bottom: 24px;
 }
 
+/* Buttons */
 .modal-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+
   gap: 12px;
 }
 
-.modal-cancel-btn {
+.modal-cancel-btn,
+.modal-logout-btn {
   padding: 10px 18px;
-  border: 1px solid #d1d5db;
+
   border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
+
+  font-size: 15px;
   font-weight: 600;
+
+  cursor: pointer;
 }
 
-.modal-cancel-btn:hover {
-  background: #f3f4f6;
+.modal-cancel-btn {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #0f172a;
 }
 
 .modal-logout-btn {
-  padding: 10px 18px;
   border: none;
-  border-radius: 10px;
   background: #dc2626;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.modal-logout-btn:hover {
-  background: #b91c1c;
+  color: #ffffff;
 }
 /* =========================================================
    TOPBAR - SPEAKER & MIC BUTTONS
@@ -1004,7 +1015,7 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
   align-items: center;
   gap: 8px;
 
-  min-width: 140px;
+  min-width: 120px;
   height: 42px;
   padding: 0 16px;
 
@@ -1152,4 +1163,316 @@ button.progress-class-card.active-progress-class-card .progress-class-count {
   font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
+}
+
+
+
+/* ===========================
+   Mobile Responsive Layout
+=========================== */
+
+.mobile-menu-btn {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Common Topbar Items */
+.topbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-btn,
+.language-wrapper {
+  flex: 1;
+}
+
+.ai-btn {
+  min-width: 140px;
+  margin-right: 0;
+  justify-content: center;
+}
+
+.language-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.notification-bell {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.profile-card {
+  flex: 1;
+  min-width: 0;
+}
+/* ===========================
+   Mobile View
+=========================== */
+@media (max-width: 900px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Main Content */
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  /* Topbar Layout */
+  .topbar {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+  }
+
+  /* Hamburger */
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    grid-column: 1;
+    grid-row: 1;
+
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Profile beside hamburger */
+  .profile-card {
+    grid-column: 2;
+    grid-row: 1;
+
+    width: 100%;
+    min-width: 0;
+    height: 58px;
+
+    padding: 10px 14px;
+    box-sizing: border-box;
+  }
+
+  .profile-card h3 {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .profile-card p {
+    font-size: 13px;
+  }
+
+  /* Search full width */
+  .topbar-left {
+    grid-column: 1 / -1;
+    grid-row: 2;
+
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-box {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* AI + Language + Bell */
+  .topbar-right {
+    grid-column: 1 / -1;
+    grid-row: 3;
+
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 8px;
+  }
+
+  /* AI Button */
+  .ai-btn {
+    flex: 1 1 120px;
+    min-width: 120px;
+    margin-right: 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  /* Language */
+  .language-wrapper {
+    flex: 1 1 120px;
+    min-width: 120px;
+    margin-right: 0;
+  }
+
+  .language-btn {
+    width: 100%;
+  }
+
+  /* Notification */
+  .notification-bell {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+    margin: 0;
+  }
+
+  /* SWAIS Brand on next row */
+  .brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 10px;
+
+  width: auto;
+  flex: 0 0 auto;
+
+  margin: 0;
+}
+  .brand-logo img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+.brand-text span:first-child {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.brand-text span:last-child {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -270px;
+
+    width: 270px;
+    max-width: 85vw;
+    height: 100dvh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    z-index: 1001;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Overlay */
+  .sidebar-overlay {
+    display: block;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 1000;
+  }
+.table-scroll-wrapper {
+    border-radius: 14px;
+  }
+
+  .table-scroll-wrapper th,
+  .table-scroll-wrapper td {
+    white-space: nowrap;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+   .modal-overlay {
+    padding: 24px;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 340px;
+
+    padding: 22px 20px;
+    border-radius: 16px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+  }
+
+  .modal-text {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .modal-cancel-btn,
+  .modal-logout-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+.table-scroll-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-wrapper table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
 }

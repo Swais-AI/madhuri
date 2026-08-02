@@ -4,7 +4,7 @@ export default function FunctionsSection({ functionsData }) {
       <div className="page-header">
         <h2>School Functions</h2>
       </div>
-
+<div className="table-scroll-wrapper">
       <table>
         <thead>
           <tr>
@@ -28,6 +28,7 @@ export default function FunctionsSection({ functionsData }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

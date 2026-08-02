@@ -4,7 +4,7 @@ export default function ClassTeachersSection({ classTeachers }) {
       <div className="page-header">
         <h2>Class Teachers</h2>
       </div>
-
+<div className="table-scroll-wrapper">
       <table>
         <thead>
           <tr>
@@ -26,6 +26,7 @@ export default function ClassTeachersSection({ classTeachers }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

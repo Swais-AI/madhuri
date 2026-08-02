@@ -13,8 +13,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import LogoutModal from "@/components/LogoutModal";
-
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+  isOpen,
+  onClose,
+}) {
   const router = useRouter();
 
   // ✅ ADD STATE FOR MODAL
@@ -53,12 +57,16 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       return;
     }
 
-    setActiveTab(item.id);
+   setActiveTab(item.id);
+
+if (window.innerWidth <= 900) {
+  onClose();
+}
   };
 
   return (
     <>
-      <div className="sidebar">
+      <div className={`sidebar ${isOpen ? "open" : ""}`}>
         <div>
           {/* BRAND */}
         <div className="brand-box">
@@ -97,6 +105,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </div>
         </div>
       </div>
+      {isOpen && (
+  <div
+    className="sidebar-overlay"
+    onClick={onClose}
+  />
+)}
 
       {/* ✅ LOGOUT MODAL (ADD HERE - OUTSIDE SIDEBAR DIV) */}
       <LogoutModal

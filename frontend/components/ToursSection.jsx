@@ -4,7 +4,7 @@ export default function ToursSection({ toursData }) {
       <div className="page-header">
         <h2>School Tours</h2>
       </div>
-
+<div className="table-scroll-wrapper">
       <table>
         <thead>
           <tr>
@@ -30,6 +30,7 @@ export default function ToursSection({ toursData }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -71,7 +71,7 @@ const [originalToursData, setOriginalToursData] = useState([]);
     tours: false,
     classTeachers: false,
   });
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ================= DASHBOARD LOAD =================
   useEffect(() => {
@@ -410,21 +410,25 @@ useEffect(() => {
   // ================= UI =================
   return (
     <div className="layout">
-
-      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
-
+<Sidebar
+  activeTab={activeTab}
+  setActiveTab={handleTabChange}
+  isOpen={sidebarOpen}
+  onClose={() => setSidebarOpen(false)}
+/>
       <div className="main-content">
 
-        <Topbar
-          headmaster={headmaster}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          notificationCount={unreadCount}
-          language={language}
-          setLanguage={setLanguage}
-          onOpenAI={() => setOpenAI(true)}
-
-        />
+   <Topbar
+  headmaster={headmaster}
+  searchText={searchText}
+  setSearchText={setSearchText}
+  notificationCount={unreadCount}
+  language={language}
+  setLanguage={setLanguage}
+  onOpenAI={() => setOpenAI(true)}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+/>
        <AIToolsModal
   open={openAI}
   onClose={() => setOpenAI(false)}

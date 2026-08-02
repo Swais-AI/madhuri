@@ -64,38 +64,41 @@ const filteredStudents = students.filter((student) => {
         ))}
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Admission No</th>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Section</th>
-            <th>Parent</th>
-            <th>Mobile</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-<tbody>
-  {!loaded ? null : filteredStudents.length === 0 ? (
-    <tr>
-      <td colSpan="7">No students found</td>
-    </tr>
-  ) : (
-    filteredStudents.map((student, index) => (
-      <tr key={`${student.student_id}-${index}`}>
-        <td>{student.admission_no || "-"}</td>
-        <td>{student.full_name || "-"}</td>
-        <td>{student.class_name || "-"}</td>
-        <td>{student.section_name || "-"}</td>
-        <td>{student.parent_name || "-"}</td>
-        <td>{student.mobile_no || "-"}</td>
-        <td>{student.email_id || "-"}</td>
+   <div className="table-scroll-wrapper">
+  <table className="table-scroll">
+    <thead>
+      <tr>
+        <th>Admission No</th>
+        <th>Name</th>
+        <th>Class</th>
+        <th>Section</th>
+        <th>Parent</th>
+        <th>Mobile</th>
+        <th>Email</th>
       </tr>
-    ))
-  )}
-</tbody>
-      </table>
+    </thead>
+
+    <tbody>
+      {!loaded ? null : filteredStudents.length === 0 ? (
+        <tr>
+          <td colSpan="7">No students found</td>
+        </tr>
+      ) : (
+        filteredStudents.map((student, index) => (
+          <tr key={`${student.student_id}-${index}`}>
+            <td>{student.admission_no || "-"}</td>
+            <td>{student.full_name || "-"}</td>
+            <td>{student.class_name || "-"}</td>
+            <td>{student.section_name || "-"}</td>
+            <td>{student.parent_name || "-"}</td>
+            <td>{student.mobile_no || "-"}</td>
+            <td>{student.email_id || "-"}</td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
     </div>
   );
 }

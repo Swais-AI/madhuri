@@ -156,7 +156,7 @@ export default function ProgressSection({ progressData = [] }) {
           <h3 className="progress-subtitle">
             {urlClass} • {students.length} Students
           </h3>
-
+<div className="table-scroll-wrapper">
           <table>
             <tbody>
               {students.map((student) => {
@@ -175,6 +175,7 @@ export default function ProgressSection({ progressData = [] }) {
               })}
             </tbody>
           </table>
+          </div>
         </>
       )}
 
@@ -203,7 +204,7 @@ export default function ProgressSection({ progressData = [] }) {
       </div>
     </div>
 
-    <div className="progress-table-scroll">
+   <div className="table-scroll-wrapper">
       <table>
         <thead>
           <tr>

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from decimal import Decimal
 
 from app.ai_config import GeminiService
-
+from app.utils.ai_tracker import log_ai_usage
 
 # ==================================================
 # Helper: Clean AI Text
@@ -14,31 +14,12 @@ def clean_ai_text(text: str):
     return re.sub(r"(\$\$|\$|```|\\\(|\\\)|\\\[|\\\])", "", text or "").strip()
 
 
-# ==================================================
-# Helper: Log AI Usage
-# ==================================================
-def log_ai_usage(db: Session, user_info: dict, feature_used: str):
-    try:
-        db.execute(text("""
-            INSERT INTO ai_usage_logs (user_name, user_email, user_type, feature_used)
-            VALUES (:name, :email, :role, :feature)
-        """), {
-            "name": user_info.get("name"),
-            "email": user_info.get("email"),
-            "role": user_info.get("role"),
-            "feature": feature_used
-        })
-        db.commit()
-    except Exception as e:
-        print("LOG ERROR:", e)
-
 
 # ==================================================
 # 1. ASSIGNMENT REPORT
 # ==================================================
 def get_assignment_report(db: Session, data: dict, user_info: dict):
 
-    log_ai_usage(db, user_info, "School-Wide Assignment Report")
 
     result = db.execute(text("""
         SELECT 
@@ -78,6 +59,13 @@ IMPORTANT FORMAT RULES:
 """
 
     ai_result = GeminiService.generate_content(prompt)
+    log_ai_usage(
+    db=db,
+    user_info=user_info,
+    module_name="Headmaster Dashboard",
+    feature_name="School-Wide Assignment Report",
+    usage_metadata=ai_result.get("usage", {}),
+)
 
     return {
         "report": clean_ai_text(ai_result.get("text", ""))
@@ -95,7 +83,7 @@ def get_academic_analytics(db: Session, payload: dict, user_info: dict):
     target_type = payload.get("target_type")
     scope = payload.get("scope")
 
-    log_ai_usage(db, user_info, f"Academic Analytics {target_type}-{scope}")
+    
 
     data = []
 
@@ -185,6 +173,13 @@ Rules:
 """
 
     ai_result = GeminiService.generate_content(prompt)
+    log_ai_usage(
+    db=db,
+    user_info=user_info,
+    module_name="Headmaster Dashboard",
+    feature_name=f"Academic Analytics {target_type}-{scope}",
+    usage_metadata=ai_result.get("usage", {}),
+)
 
     ai_text = ai_result.get("text", "{}")
 
@@ -207,7 +202,6 @@ Rules:
 # ==================================================
 def get_teacher_performance(db: Session, data: dict, user_info: dict):
 
-    log_ai_usage(db, user_info, "Teacher Performance Review")
 
     teacher_data = db.execute(text("""
         SELECT u.full_name AS name,
@@ -247,6 +241,13 @@ IMPORTANT FORMAT RULES:
 """
 
     ai_result = GeminiService.generate_content(prompt)
+    log_ai_usage(
+    db=db,
+    user_info=user_info,
+    module_name="Headmaster Dashboard",
+    feature_name="Teacher Performance Review",
+    usage_metadata=ai_result.get("usage", {}),
+)
 
     return {
         "report": clean_ai_text(ai_result.get("text", ""))
@@ -262,12 +263,7 @@ def translate_for_headmaster(db: Session, payload: dict, user_info: dict):
     if not text_value or not target_language:
         return {"error": "Missing parameters"}
 
-    log_ai_usage(
-        db,
-        user_info,
-        "Headmaster Translator"
-    )
-
+   
     is_bulk = isinstance(text_value, list)
 
     if is_bulk:
@@ -305,6 +301,13 @@ Text:
 
 
     ai_result = GeminiService.generate_content(prompt)
+    log_ai_usage(
+    db=db,
+    user_info=user_info,
+    module_name="Headmaster Dashboard",
+    feature_name="Headmaster Translator",
+    usage_metadata=ai_result.get("usage", {}),
+)
 
 
     translated_text = clean_ai_text(
