@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.config.database import engine, Base
 
 # Import models
+import os
 from app.models.role_model import Role
 from app.models.user_model import User
 from app.models.machine_model import Machine
@@ -40,6 +41,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        os.getenv("FRONTEND_URL"),
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
@@ -47,8 +49,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 # Routers
 app.include_router(role_router)
 app.include_router(user_router)
