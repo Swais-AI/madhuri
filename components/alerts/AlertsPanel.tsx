@@ -3,64 +3,35 @@
 import { useEffect, useState } from "react";
 import AlertItem from "./AlertItem";
 import AlertFilter from "./AlertFilter";
-import axios from "axios";
-
+import api from "@/services/api";
 
 export default function AlertsPanel() {
-
   const [alerts, setAlerts] = useState<any[]>([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
 
-
-
   useEffect(() => {
-
     fetchAlerts();
-
   }, []);
 
-
-
   async function fetchAlerts() {
-
     try {
-
-      const response = await axios.get(
-        "http://localhost:8000/alerts/"
-      );
-
+      const response = await api.get("/alerts");
 
       setAlerts(response.data);
-
-
     } catch (error) {
-
       console.error("Failed to load alerts", error);
-
-    }
-    finally {
-
+    } finally {
       setLoading(false);
-
     }
-
   }
-
-
 
   const filteredAlerts =
     filter === "All"
-      ?
-      alerts
-      :
-     alerts.filter(
-  (item) => item.severity === filter
-);
-
+      ? alerts
+      : alerts.filter((item) => item.severity === filter);
 
   return (
-
     <div
       className="
       bg-[#0f172a]
@@ -71,8 +42,6 @@ export default function AlertsPanel() {
       shadow-xl
       "
     >
-
-
       <div
         className="
         flex
@@ -84,7 +53,6 @@ export default function AlertsPanel() {
         pb-4
         "
       >
-
         <h1
           className="
           text-xl
@@ -94,57 +62,32 @@ export default function AlertsPanel() {
         >
           ALERTS
         </h1>
-
-
       </div>
-
-
 
       <AlertFilter
         selected={filter}
         setSelected={setFilter}
       />
 
-
-
-      {
-        loading ?
-
-        (
-          <p className="text-gray-400">
-            Loading alerts...
-          </p>
-        )
-
-        :
-
-        filteredAlerts.length === 0 ?
-
-        (
-          <p className="text-gray-400">
-            No alerts available
-          </p>
-        )
-
-        :
-
-        filteredAlerts.map((alert)=>(
-
+      {loading ? (
+        <p className="text-gray-400">
+          Loading alerts...
+        </p>
+      ) : filteredAlerts.length === 0 ? (
+        <p className="text-gray-400">
+          No alerts available
+        </p>
+      ) : (
+        filteredAlerts.map((alert) => (
           <AlertItem
-  key={alert.alert_id}
-  level={alert.severity}
-  message={alert.message}
-  action={alert.alert_status}
-  time={new Date(alert.created_at).toLocaleTimeString()}
-/>
-
+            key={alert.alert_id}
+            level={alert.severity}
+            message={alert.message}
+            action={alert.alert_status}
+            time={new Date(alert.created_at).toLocaleTimeString()}
+          />
         ))
-
-      }
-
-
+      )}
     </div>
-
   );
-
 }
