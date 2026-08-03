@@ -9,7 +9,6 @@ import {
   updateToolType,
   deleteToolType,
 } from "@/services/toolTypeService";
-
 interface ToolType {
   tool_type_id: number;
   tool_type_name: string;
