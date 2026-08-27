@@ -48,7 +48,7 @@ export default function Sidebar({
     document.cookie =
       "sgs_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 
-    window.location.href = "https://staging.sgs.swais.in";
+    window.location.href = process.env.NEXT_PUBLIC_LOGOUT_URL;
   };
 
   const handleClick = (item) => {

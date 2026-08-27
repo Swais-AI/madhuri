@@ -30,7 +30,7 @@ def log_ai_usage(
     try:
         db.execute(
             text("""
-                INSERT INTO ai_usage_logs (
+                INSERT INTO sgs_ai_usage_logs (
                     client_name,
                     user_email,
                     module_name,

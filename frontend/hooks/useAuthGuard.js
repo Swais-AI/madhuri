@@ -11,7 +11,7 @@ export default function useAuthGuard() {
     const ssoRole = sessionStorage.getItem("userRole");
 
     if (!token && ssoRole !== "Headmaster") {
-     window.location.href = "https://staging.sgs.swais.in";
+    window.location.href = process.env.NEXT_PUBLIC_LOGOUT_URL;
     }
   }, []);
 }
