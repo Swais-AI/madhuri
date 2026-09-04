@@ -12,6 +12,7 @@ def get_notifications(db: Session = Depends(get_db)):
     query = """
         SELECT notice_id, notice_title, notice_text, notice_date, is_read
         FROM sgs_notice_board
+        WHERE record_status = 'Active'
         ORDER BY notice_id DESC;
     """
 
