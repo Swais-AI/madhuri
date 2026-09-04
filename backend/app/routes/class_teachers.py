@@ -23,9 +23,12 @@ def get_class_teachers(db: Session = Depends(get_db)):
             u.mobile_no AS teacher_mobile
 
         FROM sgs_class_master c
-        LEFT JOIN sgs_users_masters u
+        INNER JOIN sgs_users_masters u
             ON c.class_teacher_id = u.user_id
         WHERE c.record_status = 'Active'
+        AND u.record_status = 'Active'
+        AND u.full_name IS NOT NULL
+        AND TRIM(u.full_name) <> ''
         ORDER BY c.class_id;
     """
 
